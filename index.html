@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RITUS STREET - Warehouse Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        :root { --bg-deep: #000000; --card-bg: #0d0d0d; --border: rgba(255, 255, 255, 0.08); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #ffffff; overflow-x: hidden; }
+        .sidebar-link { transition: all 0.2s ease; cursor: pointer; border-radius: 12px; margin-bottom: 4px; }
+        .sidebar-link.active { background: rgba(255, 255, 255, 0.1); color: white; font-weight: 700; }
+        .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; }
+        input, select { background: #181818 !important; border: 1px solid var(--border) !important; color: white !important; }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        .modal-overlay { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black">
+        <div class="w-full max-w-md space-y-8 text-center">
+            <h1 class="text-5xl font-extrabold tracking-tighter italic">RITUS STREET</h1>
+            <div class="glass-card p-10 space-y-6">
+                <input type="password" id="pass-input" placeholder="Enter Password..." class="w-full p-5 rounded-2xl text-center text-lg outline-none">
+                <button onclick="checkAuth()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase text-xs tracking-widest hover:bg-zinc-200">Enter Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="main-sidebar" class="w-64 border-r border-white/5 flex flex-col fixed h-full bg-black z-50 hidden">
+        <div class="p-8 pb-4">
+            <h1 class="text-2xl font-extrabold tracking-tighter italic text-white">RITUS STREET</h1>
+            <p class="text-[8px] uppercase tracking-[0.2em] text-zinc-600 font-bold -mt-1">Warehouse Management</p>
+        </div>
+        <nav class="flex-1 px-4 mt-8">
+            <div onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-link active p-4 flex items-center gap-4 text-zinc-400"><i class="fas fa-chart-pie text-sm"></i><span class="text-[10px] uppercase font-bold tracking-widest">Dashboard</span></div>
+            <div onclick="switchTab('add-stock')" id="nav-add-stock" class="sidebar-link p-4 flex items-center gap-4 text-zinc-400"><i class="fas fa-plus-square text-sm text-emerald-500"></i><span class="text-[10px] uppercase font-bold tracking-widest">Add Stock</span></div>
+            <div onclick="switchTab('inventory')" id="nav-inventory" class="sidebar-link p-4 flex items-center gap-4 text-zinc-400"><i class="fas fa-boxes text-sm text-blue-500"></i><span class="text-[10px] uppercase font-bold tracking-widest">Inventory</span></div>
+            <div onclick="switchTab('history')" id="nav-history" class="sidebar-link p-4 flex items-center gap-4 text-zinc-400"><i class="fas fa-history text-sm text-zinc-400"></i><span class="text-[10px] uppercase font-bold tracking-widest">History Logs</span></div>
+            <div onclick="switchTab('data-manage')" id="nav-data-manage" class="sidebar-link p-4 flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-zinc-400"><i class="fas fa-file-csv text-sm text-amber-500"></i><span class="text-[10px] uppercase font-bold tracking-widest">Data Management</span></div>
+            <div onclick="switchTab('cleanup')" id="nav-cleanup" class="sidebar-link p-4 flex items-center gap-4 text-zinc-400"><i class="fas fa-trash-alt text-sm text-rose-500"></i><span class="text-[10px] uppercase font-bold tracking-widest text-rose-500">Cleanup System</span></div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 ml-64 p-10 bg-[#050505] min-h-screen hidden">
+        
+        <!-- DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content space-y-8">
+            <h2 class="text-3xl font-black italic uppercase">Analytics Overview</h2>
+            <div class="grid grid-cols-4 gap-6">
+                <div class="glass-card p-6 text-zinc-400"><p class="text-[10px] font-bold uppercase tracking-widest">ACTIVE SKU</p><p id="dash-active" class="text-3xl font-bold text-white">0</p></div>
+                <div class="glass-card p-6 text-rose-500"><p class="text-[10px] font-bold uppercase tracking-widest">NON ACTIVE SKU</p><p id="dash-empty" class="text-3xl font-bold">0</p></div>
+                <div class="glass-card p-6 text-emerald-500"><p class="text-[10px] font-bold uppercase tracking-widest">ITEMS IN (Total)</p><p id="dash-in" class="text-3xl font-bold">0</p></div>
+                <div class="glass-card p-6 text-rose-400"><p class="text-[10px] font-bold uppercase tracking-widest">ITEMS OUT (Total)</p><p id="dash-out" class="text-3xl font-bold">0</p></div>
+            </div>
+            
+            <div class="glass-card p-10 relative">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h3 class="text-xs font-black uppercase italic tracking-widest">Stock Distribution</h3>
+                        <p class="text-[9px] text-zinc-600 font-bold uppercase mt-1">Arahkan kursor ke diagram untuk melihat persentase</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="setChartType('doughnut')" id="btn-chart-pie" class="px-4 py-2 bg-white text-black rounded-lg text-[9px] font-bold uppercase">Pie Chart</button>
+                        <button onclick="setChartType('bar')" id="btn-chart-bar" class="px-4 py-2 bg-zinc-800 text-white rounded-lg text-[9px] font-bold uppercase">Bar Chart</button>
+                    </div>
+                </div>
+                
+                <div class="w-full flex flex-col items-center">
+                    <div class="w-full max-w-lg h-80">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    <div class="flex gap-4 mt-8">
+                        <button onclick="setChartFilter('ALL')" id="cf-all" class="px-6 py-2 rounded-full border border-white/20 text-[10px] font-bold tracking-widest bg-white text-black">TOTAL STOCK</button>
+                        <button onclick="setChartFilter('In')" id="cf-in" class="px-6 py-2 rounded-full border border-white/20 text-[10px] font-bold tracking-widest">INCOMING FLOW</button>
+                        <button onclick="setChartFilter('Out')" id="cf-out" class="px-6 py-2 rounded-full border border-white/20 text-[10px] font-bold tracking-widest">OUTGOING FLOW</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD STOCK -->
+        <div id="tab-add-stock" class="tab-content hidden max-w-4xl mx-auto">
+            <h2 class="text-3xl font-black italic mb-8 uppercase text-emerald-500">Add Stock Entry</h2>
+            <div class="glass-card p-10 space-y-8">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold uppercase text-zinc-500 ml-2">Admission Date</label>
+                        <input type="date" id="in-date" class="w-full p-4 rounded-xl">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold uppercase text-zinc-500 ml-2">Category</label>
+                        <select id="in-cat" onchange="toggleFormUI()" class="w-full p-4 rounded-xl">
+                            <option value="Apparel">Apparel</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Cans">Cans</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase text-zinc-500 ml-2">Product Name</label>
+                    <input type="text" id="in-name" placeholder="E.g. Ritus Classic Tees Black..." class="w-full p-4 rounded-xl text-lg font-bold">
+                </div>
+                
+                <!-- Apparel Specific UI -->
+                <div id="ui-apparel-wrapper" class="space-y-6">
+                    <div class="flex gap-4">
+                        <button onclick="setApparelType('standard')" id="btn-app-std" class="flex-1 py-3 bg-white text-black font-black rounded-xl uppercase text-[10px] border-2 border-white">Standard Sizes (S-XXL)</button>
+                        <button onclick="setApparelType('custom')" id="btn-app-custom" class="flex-1 py-3 bg-transparent text-white font-black rounded-xl uppercase text-[10px] border-2 border-white/10">Custom Sizes (Add Dynamic)</button>
+                    </div>
+
+                    <div id="standard-sizes" class="p-8 bg-white/[0.02] border border-white/5 rounded-2xl space-y-6">
+                        <div class="grid grid-cols-5 gap-4">
+                            <div class="text-center"><span class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">S</span><input type="number" data-var="S" class="variant-input w-full p-3 text-center rounded-lg bg-black border border-white/10" placeholder="0"></div>
+                            <div class="text-center"><span class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">M</span><input type="number" data-var="M" class="variant-input w-full p-3 text-center rounded-lg bg-black border border-white/10" placeholder="0"></div>
+                            <div class="text-center"><span class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">L</span><input type="number" data-var="L" class="variant-input w-full p-3 text-center rounded-lg bg-black border border-white/10" placeholder="0"></div>
+                            <div class="text-center"><span class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">XL</span><input type="number" data-var="XL" class="variant-input w-full p-3 text-center rounded-lg bg-black border border-white/10" placeholder="0"></div>
+                            <div class="text-center"><span class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">XXL</span><input type="number" data-var="XXL" class="variant-input w-full p-3 text-center rounded-lg bg-black border border-white/10" placeholder="0"></div>
+                        </div>
+                    </div>
+
+                    <div id="custom-sizes" class="hidden p-8 bg-white/[0.02] border border-white/5 rounded-2xl space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-[10px] font-black tracking-widest uppercase text-zinc-500">Custom Size / Variant List</h4>
+                            <button onclick="addCustomVariantRow()" class="text-[9px] bg-white text-black px-4 py-2 rounded-lg font-black uppercase shadow-lg">+ Tambah Varian</button>
+                        </div>
+                        <div id="custom-variants-list" class="space-y-3">
+                            <!-- Custom inputs will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generic UI (Cans, Acc, Others) -->
+                <div id="ui-generic" class="hidden p-8 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-zinc-500 ml-1">Detail Info (Color/Volume)</label>
+                            <input type="text" id="gen-info" placeholder="Black / 400ml / Silver" class="w-full p-4 rounded-xl">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-zinc-500 ml-1">Quantity</label>
+                            <input type="number" id="gen-qty" placeholder="0" class="w-full p-4 rounded-xl text-center font-black">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="saveNewProduct()" class="w-full py-6 bg-emerald-500 text-black font-black rounded-2xl uppercase text-xs tracking-widest hover:brightness-110">Register to Warehouse</button>
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="tab-inventory" class="tab-content hidden space-y-8">
+            <div class="flex justify-between items-end">
+                <div class="space-y-4">
+                    <h2 class="text-3xl font-black italic uppercase">Inventory Control</h2>
+                    <div class="flex gap-4">
+                        <select id="inv-filter-cat" onchange="renderInventory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest cursor-pointer">
+                            <option value="ALL">All Categories</option>
+                            <option value="Apparel">Apparel</option>
+                            <option value="Cans">Cans</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Others">Others</option>
+                        </select>
+                        <select id="inv-sort" onchange="renderInventory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest cursor-pointer">
+                            <option value="default">Default Order</option>
+                            <option value="highest">Highest Stock</option>
+                            <option value="lowest">Lowest Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
+                    <input type="text" id="inv-search" onkeyup="renderInventory()" placeholder="Search Products..." class="p-4 pl-12 pr-6 rounded-full text-xs w-80 bg-zinc-900 border-none outline-none">
+                </div>
+            </div>
+            <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- HISTORY -->
+        <div id="tab-history" class="tab-content hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-black italic uppercase">History Logs</h2>
+                <div class="flex gap-4">
+                    <select id="hist-filter-cat" onchange="renderHistory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest">
+                        <option value="ALL">All Categories</option>
+                        <option value="Apparel">Apparel</option>
+                        <option value="Cans">Cans</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <select id="hist-filter-type" onchange="renderHistory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest">
+                        <option value="ALL">All Flows</option>
+                        <option value="In">Incoming (In)</option>
+                        <option value="Out">Outgoing (Out)</option>
+                    </select>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
+                        <input type="text" id="hist-search" onkeyup="renderHistory()" placeholder="Search History..." class="p-3 pl-10 rounded-full text-[10px] bg-zinc-900 border-none w-64 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="text-[10px] text-zinc-600 bg-white/[0.01]">
+                        <tr>
+                            <th class="px-8 py-5 uppercase">Date</th>
+                            <th class="px-8 py-5 uppercase">Product Name</th>
+                            <th class="px-8 py-5 uppercase">Category</th>
+                            <th class="px-8 py-5 uppercase">Variant/Spec</th>
+                            <th class="px-8 py-5 uppercase text-center">Flow</th>
+                            <th class="px-8 py-5 text-right uppercase">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body" class="text-xs"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- DATA MANAGEMENT -->
+        <div id="tab-data-manage" class="tab-content hidden max-w-2xl mx-auto space-y-8">
+            <h2 class="text-3xl font-black italic uppercase text-amber-500">Data Hub</h2>
+            <div class="glass-card p-10 space-y-10">
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black uppercase tracking-widest italic">Database Export</h3>
+                    <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Download all records in .CSV format for external audits.</p>
+                    <button onclick="exportCSV()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase text-[10px] tracking-widest">Export Database (CSV)</button>
+                </div>
+                
+                <div class="pt-10 border-t border-white/5 space-y-4">
+                    <h3 class="text-xs font-black uppercase tracking-widest italic text-amber-500">Bulk Import</h3>
+                    <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter leading-relaxed">Upload CSV file with specific header structure:<br><b>Date;Name;Info;Category;Type;Qty</b></p>
+                    <input type="file" id="import-file" accept=".csv" class="hidden" onchange="handleImport(this)">
+                    <button onclick="document.getElementById('import-file').click()" class="w-full py-5 bg-amber-500/10 text-amber-500 border border-amber-500/20 font-black rounded-2xl uppercase text-[10px] tracking-widest">Select File & Import</button>
+                    <p class="text-[9px] text-zinc-600 italic">Info: Jika kategori CSV bukan Apparel, Accessories, atau Cans, otomatis dialihkan ke 'Others'.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLEANUP -->
+        <div id="tab-cleanup" class="tab-content hidden max-w-2xl mx-auto space-y-8">
+            <h2 class="text-3xl font-black italic uppercase text-rose-500">System Cleanup</h2>
+            <div class="glass-card p-10 space-y-8">
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black uppercase tracking-widest italic">Hapus Berdasarkan Tanggal</h3>
+                    <p class="text-[10px] text-zinc-600 font-bold uppercase">Pilih rentang tanggal untuk menghapus data secara permanen.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-zinc-500 ml-2">Dari Tanggal</label>
+                            <input type="date" id="clean-from" class="w-full p-4 rounded-xl text-xs">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-zinc-500 ml-2">Sampai Tanggal</label>
+                            <input type="date" id="clean-to" class="w-full p-4 rounded-xl text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-8 border-t border-white/5 space-y-4">
+                    <p class="text-[10px] text-rose-500 font-bold uppercase text-center">Ketik "DELETE DATABASE" untuk mengotorisasi</p>
+                    <input type="text" id="clean-verify" placeholder="Ketik DELETE DATABASE..." class="w-full p-5 rounded-2xl text-center border-rose-500/20 text-rose-500 uppercase font-black tracking-[0.2em]">
+                    <div class="grid grid-cols-2 gap-4">
+<button onclick="cleanupData('range')" class="py-5 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-2xl font-black uppercase text-[10px] hover:bg-rose-500 hover:text-white transition-all">Hapus Rentang Waktu</button>
+<button onclick="cleanupData('all')" class="py-5 bg-rose-600 text-white rounded-2xl font-black uppercase text-[10px] hover:bg-rose-700 transition-all">Hapus Keseluruhan Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CONFIRMATION MODAL (IN/OUT) -->
+    <div id="modal-confirm" class="fixed inset-0 z-[300] modal-overlay flex items-center justify-center p-6 hidden">
+        <div class="glass-card w-full max-w-sm p-10 text-center space-y-6">
+            <div id="confirm-icon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-2xl"></div>
+            <h3 id="confirm-title" class="text-xl font-black italic uppercase">Otorisasi Transaksi</h3>
+            <p id="confirm-desc" class="text-xs text-zinc-400 uppercase leading-relaxed font-bold"></p>
+            <div class="grid grid-cols-2 gap-4 pt-4">
+                <button onclick="closeModal()" class="py-4 bg-zinc-900 rounded-xl font-bold uppercase text-[10px]">Batal</button>
+                <button id="confirm-btn-final" class="py-4 rounded-xl font-black uppercase text-[10px]"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKU DELETE MODAL -->
+    <div id="modal-delete-sku" class="fixed inset-0 z-[300] modal-overlay flex items-center justify-center p-6 hidden">
+        <div class="glass-card w-full max-w-sm p-10 text-center space-y-6">
+            <i class="fas fa-exclamation-triangle text-rose-500 text-3xl"></i>
+            <h3 class="text-xl font-black italic uppercase">Hapus Permanen SKU</h3>
+            <p id="delete-sku-desc" class="text-xs text-zinc-400 leading-relaxed font-bold"></p>
+            <input type="text" id="delete-sku-verify" placeholder="Ketik DELETE..." class="w-full p-4 rounded-xl text-center bg-black border-rose-500/20 text-rose-500 uppercase font-black tracking-widest">
+            <div class="grid grid-cols-2 gap-4 pt-4">
+                <button onclick="closeDeleteModal()" class="py-4 bg-zinc-900 rounded-xl font-bold text-[10px]">BATAL</button>
+                <button id="delete-sku-btn" class="py-4 bg-rose-600 rounded-xl font-black text-[10px]">HAPUS ITEM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-10 right-10 z-[400] px-10 py-6 font-black rounded-2xl text-[11px] uppercase tracking-widest shadow-2xl transition-all duration-300 translate-y-20 opacity-0 pointer-events-none italic"></div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
+  authDomain: "ritus-street.firebaseapp.com",
+  projectId: "ritus-street",
+  storageBucket: "ritus-street.firebasestorage.app",
+  messagingSenderId: "284211818232",
+  appId: "1:284211818232:web:554f6ab07ad7de6db4150d",
+  measurementId: "G-CZH8BQ99WR"
+};
+        const app = initializeApp(firebaseConfig);
+        console.log(firebaseConfig);
+        console.log("Firebase initialized");
+        console.log("API KEY:", firebaseConfig.apiKey);
+        const auth = getAuth(app);
+        const db_fs = getFirestore(app);
+        const appId = 'ritus-street-whm-v11';
+        let localDB = [];
+        let isProcessing = false;
+        let unsubscribeSnap = null;
+        let apparelType = 'standard';
+        let currentChartType = 'doughnut';
+        let currentChartFilter = 'ALL';
+        const PASSWORDS = ["RITUSSTREET2026", "RITUSMAKASSAR", "RITUS202626"];
+    function formatDate(date = new Date()) {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+}
+        function formatDisplayDate(dateStr) {
+    if (!dateStr) return '-';
+    // jika sudah DD/MM/YYYY
+    if (dateStr.includes('/')) return dateStr;
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr;
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+}
+        // Auth Logic
+async function initAuth() {
+    try {
+        await signInAnonymously(auth);
+        console.log("AUTH USER:", auth.currentUser);
+        console.log("Anonymous login success");
+    } catch (error) {
+        console.error("Auth Failure:", error);
+    }
+}
+
+window.checkAuth = async function() {
+
+    const val = document.getElementById('pass-input').value;
+
+    if (PASSWORDS.includes(val)) {
+
+        showToast("Login berhasil!");
+
+        await initAuth();
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-sidebar').classList.remove('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+
+    } else {
+
+        showToast("❌ Password Salah!", true);
+
+        document.getElementById('pass-input').value = "";
+
+        document.getElementById('pass-input').focus();
+    }
+};
+
+        // Real-time Data Sync
+        onAuthStateChanged(auth, (user) => {
+            if (!user) return;
+            const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+            if (unsubscribeSnap) unsubscribeSnap();
+            unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+                localDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localDB.sort((a, b) => {
+    const parseDate = (str) => {
+        const parts = str.split('/');
+        if(parts.length !== 3) return new Date(str);
+        return new Date(
+            `${parts[2]}-${parts[1]}-${parts[0]}`
+        );
+    };
+    return parseDate(b.date) - parseDate(a.date);
+});
+            requestAnimationFrame(() => {
+                updateDashboard();
+                renderInventory();
+                renderHistory();
+            });
+            }, (error) => {
+                if(error.code === 'permission-denied') showToast("Sesi habis, harap refresh", true);
+            });
+        });
+
+        // Tab Navigation
+        window.switchTab = (id) => {
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'text-white', 'font-bold'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(`nav-${id}`).classList.add('active', 'text-white', 'font-bold');
+            document.getElementById(`tab-${id}`).classList.remove('hidden');
+        };
+
+        // --- DASHBOARD CHARTS ---
+        window.setChartType = (type) => {
+            currentChartType = type;
+            document.getElementById('btn-chart-pie').className = type === 'doughnut' ? 'px-4 py-2 bg-white text-black rounded-lg text-[9px] font-bold uppercase' : 'px-4 py-2 bg-zinc-800 text-white rounded-lg text-[9px] font-bold uppercase';
+            document.getElementById('btn-chart-bar').className = type === 'bar' ? 'px-4 py-2 bg-white text-black rounded-lg text-[9px] font-bold uppercase' : 'px-4 py-2 bg-zinc-800 text-white rounded-lg text-[9px] font-bold uppercase';
+            updateDashboard();
+        };
+
+        window.setChartFilter = (f) => {
+            currentChartFilter = f;
+            ['all', 'in', 'out'].forEach(id => {
+                const el = document.getElementById(`cf-${id}`);
+                if(el) el.className = `px-6 py-2 rounded-full border border-white/20 text-[10px] font-bold tracking-widest ${id === f.toLowerCase() ? 'bg-white text-black' : ''}`;
+            });
+            updateDashboard();
+        };
+
+        let mainChart = null;
+        function updateDashboard() {
+            const skus = new Set(localDB.map(x => x.name));
+            const prodStock = {};
+            localDB.forEach(t => { prodStock[t.name] = (prodStock[t.name] || 0) + (t.type === 'In' ? t.qty : -t.qty); });
+            
+            document.getElementById('dash-active').innerText = skus.size;
+            document.getElementById('dash-empty').innerText = Object.values(prodStock).filter(v => v === 0).length;
+            document.getElementById('dash-in').innerText = localDB.filter(x => x.type === 'In').reduce((a,b)=>a+b.qty, 0);
+            document.getElementById('dash-out').innerText = localDB.filter(x => x.type === 'Out').reduce((a,b)=>a+b.qty, 0);
+            
+            const categories = ["Apparel", "Accessories", "Cans", "Others"];
+            const catData = categories.map(cat => {
+                const filtered = localDB.filter(x => x.category === cat);
+                if (currentChartFilter === 'ALL') {
+                    return filtered.reduce((a,b) => a + (b.type === 'In' ? b.qty : -b.qty), 0);
+                } else {
+                    return filtered.filter(x => x.type === currentChartFilter).reduce((a,b) => a + b.qty, 0);
+                }
+            });
+
+            const chartEl = document.getElementById('mainChart');
+            if(!chartEl) return;
+            const ctx = chartEl.getContext('2d');
+            if(mainChart) mainChart.destroy();
+
+            mainChart = new Chart(ctx, {
+                type: currentChartType,
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: ['#ffffff', '#3b82f6', '#fbbf24', '#4b5563'],
+                        borderWidth: 0,
+                        borderRadius: currentChartType === 'bar' ? 8 : 0
+                    }]
+                },
+                options: { 
+                    cutout: currentChartType === 'doughnut' ? '70%' : '0%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+   label: function(context) {
+
+    let label = context.label || '';
+
+    if (label) label += ': ';
+
+    let val;
+
+    if (currentChartType === 'bar') {
+        val = context.parsed.y;
+    } else {
+        val = context.parsed;
+    }
+
+    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+
+    let percentage = total > 0
+        ? Math.round((val * 100) / total)
+        : 0;
+
+    return `${label}${val} Units (${percentage}%)`;
+}
+                            }
+                        }
+                    },
+                    scales: currentChartType === 'bar' ? {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                        x: { grid: { display: false }, ticks: { color: '#888' } }
+                    } : {}
+                }
+            });
+        }
+
+        // --- ADD STOCK LOGIC ---
+        window.toggleFormUI = () => {
+            const cat = document.getElementById('in-cat').value;
+            document.getElementById('ui-apparel-wrapper').style.display = (cat === 'Apparel') ? 'block' : 'none';
+            document.getElementById('ui-generic').style.display = (cat === 'Apparel') ? 'none' : 'block';
+        };
+
+        window.setApparelType = (type) => {
+            apparelType = type;
+            const isStd = type === 'standard';
+            document.getElementById('btn-app-std').className = isStd ? 'flex-1 py-3 bg-white text-black font-black rounded-xl uppercase text-[10px] border-2 border-white' : 'flex-1 py-3 bg-transparent text-white font-black rounded-xl uppercase text-[10px] border-2 border-white/10';
+            document.getElementById('btn-app-custom').className = !isStd ? 'flex-1 py-3 bg-white text-black font-black rounded-xl uppercase text-[10px] border-2 border-white' : 'flex-1 py-3 bg-transparent text-white font-black rounded-xl uppercase text-[10px] border-2 border-white/10';
+            document.getElementById('standard-sizes').classList.toggle('hidden', !isStd);
+            document.getElementById('custom-sizes').classList.toggle('hidden', isStd);
+        };
+
+        window.addCustomVariantRow = () => {
+            const container = document.getElementById('custom-variants-list');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center bg-black p-2 rounded-xl border border-white/5";
+            div.innerHTML = `
+                <input type="text" placeholder="Nama Size..." class="cst-var-name flex-1 p-3 bg-transparent text-xs text-white uppercase outline-none border-b border-white/10 focus:border-emerald-500">
+                <input type="number" placeholder="Qty" class="cst-var-qty w-20 p-3 text-center bg-transparent text-xs text-white outline-none border-l border-white/10 font-black">
+                <button onclick="this.parentElement.remove()" class="px-3 text-rose-500 hover:text-rose-400"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        };
+
+        window.saveNewProduct = async () => {
+            if (!auth.currentUser) return showToast("Sesi tidak valid", true);
+            const date = document.getElementById('in-date').value;
+            const cat = document.getElementById('in-cat').value;
+            const name = document.getElementById('in-name').value;
+            if(!name || !date) return showToast("Lengkapi Nama & Tanggal!", true);
+
+            const batch = [];
+            if(cat === 'Apparel') {
+                if (apparelType === 'standard') {
+                    document.querySelectorAll('.variant-input').forEach(inp => {
+                        const q = parseInt(inp.value);
+                        if(q > 0) batch.push({ date, name, info: inp.dataset.var, category: cat, type: 'In', qty: q });
+                    });
+                } else {
+                    const names = document.querySelectorAll('.cst-var-name');
+                    const qtys = document.querySelectorAll('.cst-var-qty');
+                    names.forEach((nInput, i) => {
+                        const vName = nInput.value.trim().toUpperCase();
+                        const q = parseInt(qtys[i].value);
+                        if (vName && q > 0) batch.push({ date, name, info: vName, category: cat, type: 'In', qty: q });
+                    });
+                }
+            } else {
+                const q = parseInt(document.getElementById('gen-qty').value);
+                const info = document.getElementById('gen-info').value || 'Std';
+                if(q > 0) batch.push({ date, name, info, category: cat, type: 'In', qty: q });
+            }
+
+            if(batch.length === 0) return showToast("Masukkan Jumlah Stok yang valid!", true);
+            
+            try {
+                const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+ if (isProcessing) return;
+
+isProcessing = true;
+
+const btns = document.querySelectorAll('button');
+
+try {
+
+    btns.forEach(b => b.disabled = true);
+
+    const colRef = collection(
+        db_fs,
+        'artifacts',
+        appId,
+        'public',
+        'data',
+        'transactions'
+    );
+
+for (const item of batch) {
+
+    // SAVE INVENTORY
+    await addDoc(colRef, item);
+
+    // SAVE HISTORY LOG
+    await addDoc(
+        collection(
+            db_fs,
+            'artifacts',
+            appId,
+            'public',
+            'data',
+            'transactions'
+        ),
+        {
+            date: formatDate(),
+            name: item.name,
+            info: item.info || "-",
+            category: item.category,
+            type: 'In',
+            qty: item.qty
+        }
+    );
+}
+
+    showToast("Produk berhasil ditambahkan!");
+
+    // RESET FORM
+    document.getElementById('in-name').value = "";
+    document.querySelectorAll('.variant-input').forEach(i => i.value = "");
+    document.getElementById('custom-variants-list').innerHTML = "";
+    document.getElementById('gen-qty').value = "";
+    document.getElementById('gen-info').value = "";
+
+} catch(e) {
+
+    console.error(e);
+
+    showToast("Gagal menyimpan data", true);
+
+} finally {
+
+    isProcessing = false;
+
+    btns.forEach(b => b.disabled = false);
+}
+                showToast("Produk berhasil ditambahkan!");
+                
+                // Reset form
+                document.getElementById('in-name').value = "";
+                document.querySelectorAll('.variant-input').forEach(i => i.value = "");
+                document.getElementById('custom-variants-list').innerHTML = "";
+                document.getElementById('gen-qty').value = "";
+                document.getElementById('gen-info').value = "";
+            } catch (e) {
+                showToast("Gagal menyimpan data", true);
+            }
+        };
+
+        // --- INVENTORY LOGIC ---
+        window.renderInventory = () => {
+            const search = document.getElementById('inv-search').value.toLowerCase();
+            const catFilter = document.getElementById('inv-filter-cat').value;
+            const sortMode = document.getElementById('inv-sort').value;
+            
+            const products = {};
+            localDB.forEach(t => {
+                const key = `${t.name}|||${t.category}`;
+                if(!products[key]) products[key] = { variants: {}, total: 0 };
+                const net = (t.type === 'In' ? t.qty : -t.qty);
+                products[key].variants[t.info] = (products[key].variants[t.info] || 0) + net;
+                products[key].total += net;
+            });
+
+            let entries = Object.entries(products);
+            if(catFilter !== 'ALL') entries = entries.filter(([k]) => k.split('|||')[1] === catFilter);
+            if(search) entries = entries.filter(([k]) => k.toLowerCase().includes(search));
+            if(sortMode === 'highest') entries.sort((a, b) => b[1].total - a[1].total);
+            if(sortMode === 'lowest') entries.sort((a, b) => a[1].total - b[1].total);
+
+            const grid = document.getElementById('inventory-grid');
+            if(!grid) return;
+            grid.innerHTML = entries.map(([key, data]) => {
+                const [name, cat] = key.split('|||');
+                let varHTML = "";
+                Object.entries(data.variants).forEach(([vName, vQty]) => {
+                    varHTML += `
+                        <div class="flex justify-between items-center p-3 bg-white/[0.03] border border-white/5 rounded-xl mb-1">
+                            <div class="flex-1">
+                                <p class="text-[9px] font-black text-zinc-500 uppercase">${vName}</p>
+                                <p class="font-bold text-xs ${vQty <= 0 ? 'text-rose-500' : 'text-white'}">${vQty} units</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="inp-${name.replace(/\s+/g,'')}-${vName.replace(/\s+/g,'')}" placeholder="0" class="w-12 p-2 text-center text-xs font-bold rounded bg-zinc-900 border-none outline-none">
+                                <button onclick="triggerMove('${name}','${vName}','${cat}','In')" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-black transition-all text-[10px]"><i class="fas fa-plus"></i></button>
+                                <button onclick="triggerMove('${name}','${vName}','${cat}','Out')" class="w-8 h-8 rounded bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all text-[10px]"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>`;
+                });
+
+                return `
+                    <div class="sku-card glass-card p-6 flex flex-col h-full relative group">
+                        <button onclick="triggerDeleteSKU('${name}','${cat}')" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-400 text-xs transition-all p-2"><i class="fas fa-trash-alt"></i></button>
+                        <div class="mb-4 pr-6">
+                            <h3 class="text-[12px] font-black uppercase truncate">${name}</h3>
+                            <span class="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">${cat}</span>
+                        </div>
+                        <div class="flex-1 space-y-1 overflow-y-auto max-h-48 pr-1">${varHTML}</div>
+                        <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center font-black">
+                            <span class="text-[9px] text-zinc-500 uppercase">Total Unit Item</span>
+                            <span class="text-sm">${data.total}</span>
+                        </div>
+                    </div>`;
+            }).join('');
+        };
+
+        window.triggerMove = (name, info, cat, type) => {
+            const elId = `inp-${name.replace(/\s+/g,'')}-${info.replace(/\s+/g,'')}`;
+            const el = document.getElementById(elId);
+            const val = parseInt(el.value);
+            if(!val || val <= 0) return showToast("Masukkan jumlah yang benar!", true);
+
+            if(type === 'Out') {
+                const stock = localDB.filter(x => x.name === name && x.info === info).reduce((a,c)=>a+(c.type==='In'?c.qty:-c.qty),0);
+                if(val > stock) return showToast(`Stok ${info} kurang! Sisa: ${stock}`, true);
+            }
+
+            const modal = document.getElementById('modal-confirm');
+            const icon = document.getElementById('confirm-icon');
+            icon.className = `w-16 h-16 rounded-full mx-auto flex items-center justify-center text-2xl ${type === 'In' ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-white'}`;
+            icon.innerHTML = `<i class="fas fa-${type==='In'?'plus':'minus'}"></i>`;
+            document.getElementById('confirm-desc').innerText = `Konfirmasi ${type === 'In' ? 'penambahan' : 'pengurangan'} ${val} unit untuk ${name} (${info})?`;
+            
+            const btn = document.getElementById('confirm-btn-final');
+            btn.innerText = `KONFIRMASI ${type.toUpperCase()}`;
+            btn.className = `py-4 rounded-xl font-black text-[10px] uppercase ${type === 'In' ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-white'}`;
+ btn.onclick = async () => {
+
+    if (isProcessing) return;
+
+    isProcessing = true;
+
+    btn.disabled = true;
+
+    btn.innerHTML = "PROCESSING...";
+
+    try {
+
+        if (!auth.currentUser) {
+            throw new Error("Auth invalid");
+        }
+
+        closeModal();
+
+        const colRef = collection(
+            db_fs,
+            'artifacts',
+            appId,
+            'public',
+            'data',
+            'transactions'
+        );
+
+        const payload = {
+            date: formatDate(),
+            name,
+            info,
+            category: cat,
+            type,
+            qty: val
+        };
+        await new Promise(r => setTimeout(r, 300));
+        await addDoc(colRef, payload);
+
+        showToast("Stok berhasil diupdate!");
+
+        el.value = "";
+
+    } catch(err) {
+
+        console.error(err);
+
+        showToast("Gagal update stok", true);
+
+    } finally {
+
+        isProcessing = false;
+
+        btn.disabled = false;
+
+        btn.innerHTML = `KONFIRMASI ${type.toUpperCase()}`;
+    }
+};
+                    modal.classList.remove('hidden');
+                };
+
+        window.triggerDeleteSKU = (name, cat) => {
+            const modal = document.getElementById('modal-delete-sku');
+            document.getElementById('delete-sku-desc').innerText = `Menghapus produk "${name}" akan memusnahkan semua riwayat transaksi untuk item ini.`;
+            document.getElementById('delete-sku-verify').value = "";
+            document.getElementById('delete-sku-btn').onclick = async () => {
+                if(document.getElementById('delete-sku-verify').value === 'DELETE') {
+                    if (!auth.currentUser) return;
+                    showToast("Sedang menghapus SKU...", true);
+                    const toDelete = localDB.filter(x => x.name === name && x.category === cat);
+                    for (const item of toDelete) {
+                        await deleteDoc(doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id));
+                    }
+                    closeDeleteModal();
+                    showToast("SKU berhasil dihapus permanen");
+                } else {
+                    showToast("Pengetikan verifikasi salah!", true);
+                }
+            };
+            modal.classList.remove('hidden');
+        };
+
+        // --- HISTORY ---
+        window.renderHistory = () => {
+            const search = document.getElementById('hist-search').value.toLowerCase();
+            const typeF = document.getElementById('hist-filter-type').value;
+            const catF = document.getElementById('hist-filter-cat').value;
+            
+            let data = localDB.filter(x => {
+                const matchSearch = x.name.toLowerCase().includes(search) || (x.info && x.info.toLowerCase().includes(search));
+                const matchType = typeF === 'ALL' || x.type === typeF;
+                const matchCat = catF === 'ALL' || x.category === catF;
+                return matchSearch && matchType && matchCat;
+            });
+
+            const body = document.getElementById('history-body');
+            if(!body) return;
+            body.innerHTML = data.map(t => `
+                <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
+                    <td class="px-8 py-4 opacity-40">${t.date}</td>
+                    <td class="px-8 py-4 font-bold uppercase text-white">${t.name}</td>
+                    <td class="px-8 py-4 text-[10px] font-bold text-zinc-500 uppercase">${t.category}</td>
+                    <td class="px-8 py-4 text-zinc-400 font-bold uppercase">${t.info}</td>
+                    <td class="px-8 py-4"><span class="px-2 py-1 rounded text-[8px] font-black uppercase ${t.type==='In'?'bg-emerald-500/10 text-emerald-500':'bg-rose-500/10 text-rose-500'}">${t.type}</span></td>
+                    <td class="px-8 py-4 text-right font-black ${t.type==='In'?'text-emerald-500':'text-rose-400'}">${t.type==='In'?'+':'-'}${t.qty}</td>
+                </tr>`).join('');
+        };
+
+        // --- CSV IMPORT / EXPORT ---
+        window.exportCSV = () => {
+    let csv = "Date;Name;Info;Category;Type;Qty\n";
+    localDB.forEach(t => {
+        csv += `${formatDisplayDate(t.date)};${t.name};${t.info};${t.category};${t.type};${t.qty}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = window.URL.createObjectURL(blob);
+    a.download = `RITUS_DATA_${formatDate()}.csv`;
+    a.click();
+};
+
+        window.handleImport = async (input) => {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                if(!auth.currentUser) return;
+                const lines = e.target.result.split('\n');
+                const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+                let count = 0;
+                
+                for (let i=1; i<lines.length; i++) {
+                    const line = lines[i].trim();
+                    if(!line) continue;
+                    const parts = line.split(';');
+                    if(parts.length < 6) continue;
+                    
+                    let cat = parts[3].trim();
+                    const catLower = cat.toLowerCase();
+                    // AUTO CATEGORIZE
+                    if (catLower.includes('acc')) { cat = 'Accessories'; }
+                    else if (catLower === 'apparel') { cat = 'Apparel'; }
+                    else if (catLower === 'cans') { cat = 'Cans'; }
+                    else { cat = 'Others'; }
+
+                    await addDoc(colRef, { 
+                        date: parts[0].trim(), 
+                        name: parts[1].trim(), 
+                        info: parts[2].trim(), 
+                        category: cat, 
+                        type: parts[4].trim(), 
+                        qty: parseInt(parts[5].trim()) 
+                    });
+                    count++;
+                }
+                showToast(`Import Success: ${count} Logs added`, false);
+                input.value = "";
+            };
+            reader.readAsText(file);
+        };
+        // --- CLEANUP ---
+// --- CLEANUP ---
+
+    window.cleanupData = (mode) => {
+    window.cleanupMode = mode;
+    confirmCleanup();
+    switchTab('cleanup');
+
+};
+
+window.confirmCleanup = async () => {
+
+    const verifyText =
+        document.getElementById('clean-verify').value;
+
+    if (verifyText.trim().toUpperCase() !== 'DELETE DATABASE') {
+
+        return showToast(
+            "Ketik DELETE DATABASE untuk verifikasi!",
+            true
+        );
+    }
+
+const from =
+    document.getElementById('clean-from').value;
+const to =
+    document.getElementById('clean-to').value;
+
+console.log("VERIFY:", verifyText);
+console.log("MODE:", window.cleanupMode);
+console.log("LOCALDB:", localDB.length);
+
+if(localDB.length === 0) {
+
+    return showToast(
+        "Database kosong / belum termuat",
+        true
+    );
+}
+    let toPurge = [];
+
+    if (window.cleanupMode === 'all') {
+
+        toPurge = [...localDB];
+
+    } else if (from && to) {
+
+        toPurge = localDB.filter(x => {
+
+            const parts = x.date.split('/');
+            if (parts.length !== 3) return false;
+            const formatted =
+                `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return formatted >= from &&
+                   formatted <= to;
+        });
+
+    } else {
+
+        return showToast(
+            "Pilih kedua rentang tanggal!",
+            true
+        );
+    }
+    if (toPurge.length === 0) {
+        return showToast(
+            "Tidak ada data ditemukan.",
+            true
+        );
+    }
+    if (!auth.currentUser) {
+        return showToast(
+            "Auth tidak valid",
+            true
+        );
+    }
+
+    showToast("Sedang membersihkan data...");
+
+    for (const item of toPurge) {
+
+        await deleteDoc(
+            doc(
+                db_fs,
+                'artifacts',
+                appId,
+                'public',
+                'data',
+                'transactions',
+                item.id
+            )
+        );
+    }
+    showToast(
+        `${toPurge.length} logs berhasil dihapus`
+    );
+    document.getElementById('clean-verify').value = "";
+    switchTab('inventory');
+};
+        // UTILS
+        window.closeModal = () => document.getElementById('modal-confirm').classList.add('hidden');
+        window.closeDeleteModal = () => document.getElementById('modal-delete-sku').classList.add('hidden');
+
+        function showToast(m, err=false) {
+            const t = document.getElementById('toast');
+            if(!t) return;
+            t.innerText = m;
+            t.className = `fixed bottom-10 right-10 z-[400] px-10 py-6 font-black rounded-2xl text-[11px] uppercase tracking-widest shadow-2xl transition-all duration-300 italic ${err?'bg-rose-600 text-white':'bg-white text-black'} show`;
+            setTimeout(()=>t.classList.remove('show'), 3000);
+        }
+        document.getElementById('pass-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        checkAuth();
+    }
+});
+    </script>
+</body>
+</html>
