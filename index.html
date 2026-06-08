@@ -533,17 +533,22 @@
 
         // Alur Autentikasi Pengamat Resmi (State Observer) Firebase yang aman dari Refresh
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                console.log("Firebase Auth: Terautentikasi.", user.uid);
-                localStorage.setItem('ritus_authenticated', 'true');
-                
-                // Masuk langsung ke dashboard
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-sidebar').classList.remove('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                
-                // Hubungkan sinkronisasi data real-time
-                startRealtimeSync();
+if (user) {
+    console.log("Firebase Auth: Terautentikasi.", user.uid);
+    localStorage.setItem('ritus_authenticated', 'true');
+
+    console.log("Elemen login:", document.getElementById('login-screen'));
+    console.log("Elemen sidebar:", document.getElementById('main-sidebar'));
+    console.log("Elemen content:", document.getElementById('main-content'));
+
+    document.getElementById('login-screen')?.classList.add('hidden');
+    document.getElementById('main-sidebar')?.classList.remove('hidden');
+    document.getElementById('main-content')?.classList.remove('hidden');
+
+    console.log("Menjalankan startRealtimeSync()");
+    startRealtimeSync();
+
+    console.log("startRealtimeSync() selesai dipanggil");
             } else {
                 console.log("Firebase Auth: Tidak ada sesi.");
                 const isSavedAuth = localStorage.getItem('ritus_authenticated');
