@@ -1127,14 +1127,25 @@ if (user) {
             });
 
             let entries = Object.entries(products);
+            console.log("inventory-grid =", document.getElementById('inventory-grid'));
+            console.log("localDB =", localDB);
+            console.log("entries =", entries);
+            console.log("entries length =", entries.length);
             if(catFilter !== 'ALL') entries = entries.filter(([k]) => k.split('|||')[1] === catFilter);
             if(search) entries = entries.filter(([k]) => k.split('|||')[0].includes(search));
             if(sortMode === 'highest') entries.sort((a, b) => b[1].total - a[1].total);
             if(sortMode === 'lowest') entries.sort((a, b) => a[1].total - b[1].total);
 
             const grid = document.getElementById('inventory-grid');
-            if(!grid) return;
-            
+            console.log("inventory-grid =", grid);
+
+            if(!grid) {
+                console.error("inventory-grid TIDAK DITEMUKAN");
+                return;
+            }
+         console.log("entries =", entries);
+        console.log("jumlah entries =", entries.length);
+
             if (entries.length === 0) {
                 grid.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-500 font-bold uppercase text-xs tracking-wider">SKU tidak ditemukan</div>`;
                 return;
