@@ -743,15 +743,27 @@
             const btns = document.querySelectorAll('button');
             
             try {
-                btns.forEach(b => b.disabled = true);
-                const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+btns.forEach(b => b.disabled = true);
 
-for (const item of batch) {
-    const ref = await addDoc(colRef, item);
-}
+const colRef = collection(
+    db_fs,
+    'artifacts',
+    appId,
+    'public',
+    'data',
+    'transactions'
+);
 
-    console.log("SUCCESS");
-    console.log(ref.id);
+try {
+
+    for (const item of batch) {
+
+        const ref = await addDoc(colRef, item);
+
+        console.log("SUCCESS");
+        console.log("DOC ID:", ref.id);
+
+    }
 
 } catch (err) {
 
@@ -759,52 +771,6 @@ for (const item of batch) {
     console.error(err);
 
 }
-                }
-
-                showToast("Produk berhasil ditambahkan!");
-
-                // RESET FORM
-                document.getElementById('in-name').value = "";
-                document.getElementById('in-price-capital').value = "";
-                document.getElementById('in-price-selling').value = "";
-                document.getElementById('in-operator').value = "";
-                document.querySelectorAll('.variant-input').forEach(i => i.value = "");
-                document.getElementById('custom-variants-list').innerHTML = "";
-                document.getElementById('gen-qty').value = "";
-                document.getElementById('gen-info').value = "";
-
-            } catch(e) {
-                console.error(e);
-                showToast("Gagal menyimpan data", true);
-            } finally {
-                isProcessing = false;
-                btns.forEach(b => b.disabled = false);
-            }
-        };
-
-        // --- ANTRIAN TRANSAKSI MASSAL (CART LOGIC) ---
-        function updateCartUI() {
-            const countEl = document.getElementById('cart-count');
-            const btnEl = document.getElementById('cart-floating-btn');
-            
-            if (countEl) countEl.innerText = transactionCart.length;
-            
-            if (transactionCart.length > 0) {
-                btnEl.classList.remove('hidden');
-            } else {
-                btnEl.classList.add('hidden');
-            }
-        }
-
-        window.toggleCartModal = (show) => {
-            const modal = document.getElementById('modal-cart');
-            if (show) {
-                renderCartItems();
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
-            }
-        };
 
         function calculateCartTotals() {
             let totalIn = 0;
