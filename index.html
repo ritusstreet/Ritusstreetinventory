@@ -489,47 +489,57 @@
         }
 
         // Setup real-time listener di luar trigger login agar sinkronisasi langsung jalan setelah login sukses
-        function startRealtimeSync() {
-            const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
-            if (unsubscribeSnap) unsubscribeSnap();
-            
-            unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
-                localDB = snapshot.docs.map(doc => {
-                    const d = doc.data();
-                    return { 
-                        id: doc.id, 
-                        ...d,
-                        // Menyeragamkan data untuk menghindari inkonsistensi string
-                        name: (d.name || '').trim().toUpperCase(),
-                        info: (d.info || 'STD').trim().toUpperCase(),
-                        category: (d.category || 'OTHERS').trim().toUpperCase(),
-                        operator: (d.operator || 'SYSTEM_IMPORT').trim().toUpperCase(),
-                        type: (d.type || '').trim().toUpperCase() // IN / OUT standarisasi huruf besar
-                    };
-                });
-                
-                localDB.sort((a, b) => {
-                    const parseDate = (str) => {
-                        if (!str) return new Date(0);
-                        const parts = str.split('/');
-                        if(parts.length !== 3) return new Date(str);
-                        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                    };
-                    return parseDate(b.date) - parseDate(a.date);
-                });
-                
-                requestAnimationFrame(() => {
-                    updateDashboard();
-                    renderInventory();
-                    renderHistory();
-                });
-            }, (error) => {
-                console.error("Firestore Listener Error: ", error);
-                if(error.code === 'permission-denied') {
-                    showToast("Sesi habis, harap login kembali.", true);
-                }
-            });
-        }
+function startRealtimeSync() {
+    console.log("startRealtimeSync DIMULAI");
+    const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+    if (unsubscribeSnap) unsubscribeSnap();
+
+    unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+
+        console.log("SNAPSHOT DITERIMA");
+        console.log("Jumlah dokumen:", snapshot.size);
+
+        localDB = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+                id: doc.id,
+                ...d,
+                name: (d.name || '').trim().toUpperCase(),
+                info: (d.info || 'STD').trim().toUpperCase(),
+                category: (d.category || 'OTHERS').trim().toUpperCase(),
+                operator: (d.operator || 'SYSTEM_IMPORT').trim().toUpperCase(),
+                type: (d.type || '').trim().toUpperCase()
+            };
+        });
+
+        console.log("localDB:", localDB);
+        console.log("Render dashboard dimulai");
+
+        localDB.sort((a, b) => {
+            const parseDate = (str) => {
+                if (!str) return new Date(0);
+                const parts = str.split('/');
+                if(parts.length !== 3) return new Date(str);
+                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            };
+            return parseDate(b.date) - parseDate(a.date);
+        });
+
+        requestAnimationFrame(() => {
+            console.log("updateDashboard()");
+            updateDashboard();
+
+            console.log("renderInventory()");
+            renderInventory();
+
+            console.log("renderHistory()");
+            renderHistory();
+        });
+
+    }, (error) => {
+        console.error("Firestore Listener Error:", error);
+    });
+}
 
         // Alur Autentikasi Pengamat Resmi (State Observer) Firebase yang aman dari Refresh
         onAuthStateChanged(auth, async (user) => {
