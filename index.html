@@ -754,22 +754,11 @@ const colRef = collection(
     'transactions'
 );
 
-try {
+for (const item of batch) {
+    const ref = await addDoc(colRef, item);
 
-    for (const item of batch) {
-
-        const ref = await addDoc(colRef, item);
-
-        console.log("SUCCESS");
-        console.log("DOC ID:", ref.id);
-
-    }
-
-} catch (err) {
-
-    console.error("ADD DOC ERROR");
-    console.error(err);
-
+    console.log("SUCCESS");
+    console.log("DOC ID:", ref.id);
 }
 
         function calculateCartTotals() {
