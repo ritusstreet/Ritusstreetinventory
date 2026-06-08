@@ -1349,6 +1349,8 @@ if (user) {
                 
                 // Pisahkan baris menggunakan regex aman dari karakter Carriage Return (\r\n)
                 const lines = e.target.result.split(/\r?\n/);
+                console.log("JUMLAH BARIS CSV:", lines.length);
+                console.log(lines);
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
                 console.log("IMPORT KE:", colRef.path);
                 let count = 0;
