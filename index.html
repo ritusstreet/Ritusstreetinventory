@@ -1401,17 +1401,23 @@ for (let i = 1; i < lines.length; i++) {
                 if (itemPayload.name && itemPayload.qty > 0) {
 
     console.log("AKAN DISIMPAN:", itemPayload);
-
 try {
 
     console.log("USER:", auth.currentUser?.uid);
     console.log("PAYLOAD:", JSON.stringify(itemPayload));
-console.log("SEBELUM addDoc");
-    const docRef = await addDoc(colRef, itemPayload);
-console.log("SETELAH addDoc");
-    console.log("BERHASIL:", docRef.id);
-count++;     
-    console.log("LANJUT KE BARIS BERIKUTNYA");
+
+    console.log("SEBELUM addDoc");
+
+    addDoc(colRef, itemPayload)
+    .then(docRef => {
+        console.log("BERHASIL:", docRef.id);
+        count++;
+    })
+    .catch(err => {
+        console.error("ERROR ADDDOC:", err);
+    });
+
+    console.log("SETELAH MEMANGGIL addDoc");
 
 } catch(err) {
 
