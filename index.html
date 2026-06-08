@@ -494,6 +494,7 @@
 function startRealtimeSync() {
     console.log("startRealtimeSync DIMULAI");
     const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+    console.log("BACA DARI:", colRef.path);
     if (unsubscribeSnap) unsubscribeSnap();
 
     unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
@@ -1349,6 +1350,7 @@ if (user) {
                 // Pisahkan baris menggunakan regex aman dari karakter Carriage Return (\r\n)
                 const lines = e.target.result.split(/\r?\n/);
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+                console.log("IMPORT KE:", colRef.path);
                 let count = 0;
                 
                 for (let i = 1; i < lines.length; i++) {
