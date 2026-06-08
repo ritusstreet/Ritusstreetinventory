@@ -1373,8 +1373,7 @@ for (let i = 1; i < lines.length; i++) {
         console.log("SKIP: kolom kurang");
         continue;
     }
-         }
-                   }
+         
                     let cat = parts[3].trim().toUpperCase();
                     if (cat.includes('ACC')) { cat = 'ACCESSORIES'; }
                     else if (cat === 'APPAREL') { cat = 'APPAREL'; }
@@ -1415,6 +1414,7 @@ for (let i = 1; i < lines.length; i++) {
 
     }
                     }
+}
                 console.log("Total berhasil diimport:", count);
                 showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
