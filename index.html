@@ -438,6 +438,8 @@
         const appId = 'ritus-street-whm';
         console.log("Project ID:", firebaseConfig.projectId);
         console.log("App ID:", appId);
+        console.log("DB APP:", db_fs.app.options.projectId);
+        console.log("HOST:", db_fs._settings?.host);
         let localDB = [];
         let isProcessing = false;
         let unsubscribeSnap = null;
@@ -497,12 +499,17 @@ function startRealtimeSync() {
     console.log("BACA DARI:", colRef.path);
     if (unsubscribeSnap) unsubscribeSnap();
 
-    unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+  unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
 
-        console.log("SNAPSHOT DITERIMA");
-        console.log("Jumlah dokumen:", snapshot.size);
+    console.log("SNAPSHOT DITERIMA");
+    console.log("Jumlah dokumen:", snapshot.size);
 
-        localDB = snapshot.docs.map(doc => {
+    snapshot.docs.forEach(doc => {
+        console.log("DOC ID:", doc.id);
+        console.log("DATA:", doc.data());
+    });
+
+    localDB = snapshot.docs.map(doc => {
             const d = doc.data();
             return {
                 id: doc.id,
