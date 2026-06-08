@@ -1353,7 +1353,27 @@ if (user) {
                 console.log("IMPORT KE:", colRef.path);
                 let count = 0;
                 
-                for (let i = 1; i < lines.length; i++) {
+           for (let i = 1; i < lines.length; i++) {
+
+    console.log("BARIS", i);
+    console.log(lines[i]);
+
+    if(!line) continue;
+    const line = lines[i].trim();
+
+    if(!line) {
+        console.log("SKIP: kosong");
+        continue;
+    }
+
+    const parts = line.split(';');
+
+    console.log("PARTS:", parts);
+
+    if(parts.length < 6) {
+        console.log("SKIP: kolom kurang");
+        continue;
+    }
                     const line = lines[i].trim();
                     if(!line) continue;
                     
@@ -1382,12 +1402,24 @@ if (user) {
                         operator
                     };
 
-                    if (itemPayload.name && itemPayload.qty > 0) {
-                        const docRef = await addDoc(colRef, itemPayload);
-                        console.log("Berhasil disimpan:", docRef.id, itemPayload);
-                        count++;
+                if (itemPayload.name && itemPayload.qty > 0) {
+
+    console.log("AKAN DISIMPAN:", itemPayload);
+
+    try {
+
+        const docRef = await addDoc(colRef, itemPayload);
+
+        console.log("BERHASIL:", docRef.id);
+
+        count++;
+
+    } catch(err) {
+
+        console.error("GAGAL:", err);
+
+    }
                     }
-                }
                 console.log("Total berhasil diimport:", count);
                 showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
