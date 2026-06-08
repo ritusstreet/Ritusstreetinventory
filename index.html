@@ -422,18 +422,16 @@
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
         const firebaseConfig = {
-          apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
-          authDomain: "ritus-street.firebaseapp.com",
-          databaseURL: "https://ritus-street-default-rtdb.firebaseio.com",
-          projectId: "ritus-street",
-          storageBucket: "ritus-street.firebasestorage.app",
-          messagingSenderId: "284211818232",
-          appId: "1:284211818232:web:72a0201e4093157cb4150d",
-          measurementId: "G-GVFB87EJ23"
+              apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
+              authDomain: "ritus-street.firebaseapp.com",
+              projectId: "ritus-street",
+              storageBucket: "ritus-street.firebasestorage.app",
+              messagingSenderId: "284211818232",
+              appId: "1:284211818232:web:72a0201e4093157cb4150d",
+              measurementId: "G-GVFB87EJ23"
         };
         
         const app = initializeApp(firebaseConfig);
-        console.log("PROJECT ID:", firebaseConfig.projectId);
         console.log("Firebase initialized");
         const auth = getAuth(app);
         const db_fs = getFirestore(app);
@@ -520,41 +518,26 @@
             if (!user) return;
             const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
             if (unsubscribeSnap) unsubscribeSnap();
-   unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+            unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+                localDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                localDB.sort((a, b) => {
+                    const parseDate = (str) => {
+                        const parts = str.split('/');
+                        if(parts.length !== 3) return new Date(str);
+                        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    };
+                    return parseDate(b.date) - parseDate(a.date);
+                });
+                requestAnimationFrame(() => {
+                    updateDashboard();
+                    renderInventory();
+                    renderHistory();
+                });
+            }, (error) => {
+                if(error.code === 'permission-denied') showToast("Sesi habis, harap refresh", true);
+            });
+        });
 
-    console.log("SNAPSHOT RECEIVED");
-    console.log("DOC COUNT:", snapshot.size);
-    console.log("DOCS:", snapshot.docs);
-
-    localDB = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
-
-    console.log("LOCAL DB:", localDB);
-
-    localDB.sort((a, b) => {
-        const parseDate = (str) => {
-            const parts = str.split('/');
-            if(parts.length !== 3) return new Date(str);
-            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-        };
-        return parseDate(b.date) - parseDate(a.date);
-    });
-
-    requestAnimationFrame(() => {
-        updateDashboard();
-        renderInventory();
-        renderHistory();
-    });
-
-}, (error) => {
-
-    console.error("FIRESTORE ERROR:", error);
-
-    if(error.code === 'permission-denied')
-        showToast("Sesi habis, harap refresh", true);
-});
         // Tab Navigation
         window.switchTab = (id) => {
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'text-white', 'font-bold'));
@@ -743,23 +726,57 @@
             const btns = document.querySelectorAll('button');
             
             try {
-btns.forEach(b => b.disabled = true);
+                btns.forEach(b => b.disabled = true);
+                const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
 
-const colRef = collection(
-    db_fs,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'transactions'
-);
+                for (const item of batch) {
+                    await addDoc(colRef, item);
+                }
 
-for (const item of batch) {
-    const ref = await addDoc(colRef, item);
+                showToast("Produk berhasil ditambahkan!");
 
-    console.log("SUCCESS");
-    console.log("DOC ID:", ref.id);
-}
+                // RESET FORM
+                document.getElementById('in-name').value = "";
+                document.getElementById('in-price-capital').value = "";
+                document.getElementById('in-price-selling').value = "";
+                document.getElementById('in-operator').value = "";
+                document.querySelectorAll('.variant-input').forEach(i => i.value = "");
+                document.getElementById('custom-variants-list').innerHTML = "";
+                document.getElementById('gen-qty').value = "";
+                document.getElementById('gen-info').value = "";
+
+            } catch(e) {
+                console.error(e);
+                showToast("Gagal menyimpan data", true);
+            } finally {
+                isProcessing = false;
+                btns.forEach(b => b.disabled = false);
+            }
+        };
+
+        // --- ANTRIAN TRANSAKSI MASSAL (CART LOGIC) ---
+        function updateCartUI() {
+            const countEl = document.getElementById('cart-count');
+            const btnEl = document.getElementById('cart-floating-btn');
+            
+            if (countEl) countEl.innerText = transactionCart.length;
+            
+            if (transactionCart.length > 0) {
+                btnEl.classList.remove('hidden');
+            } else {
+                btnEl.classList.add('hidden');
+            }
+        }
+
+        window.toggleCartModal = (show) => {
+            const modal = document.getElementById('modal-cart');
+            if (show) {
+                renderCartItems();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        };
 
         function calculateCartTotals() {
             let totalIn = 0;
