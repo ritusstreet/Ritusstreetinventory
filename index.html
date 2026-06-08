@@ -1406,11 +1406,11 @@ try {
 
     console.log("USER:", auth.currentUser?.uid);
     console.log("PAYLOAD:", JSON.stringify(itemPayload));
-
+console.log("SEBELUM addDoc");
     const docRef = await addDoc(colRef, itemPayload);
-
+console.log("SETELAH addDoc");
     console.log("BERHASIL:", docRef.id);
-     
+count++;     
     console.log("LANJUT KE BARIS BERIKUTNYA");
 
 } catch(err) {
