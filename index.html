@@ -1422,6 +1422,9 @@ try {
     })
     .catch(err => {
         console.error("ERROR ADDDOC:", err);
+    })
+    .finally(() => {
+        console.log("SELESAI PROMISE");
     });
 
     console.log("SETELAH MEMANGGIL addDoc");
