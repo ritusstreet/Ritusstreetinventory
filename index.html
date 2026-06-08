@@ -32,8 +32,8 @@
         <div class="w-full max-w-md space-y-8 text-center">
             <h1 class="text-5xl font-extrabold tracking-tighter italic">RITUS STREET</h1>
             <div class="glass-card p-10 space-y-6">
-                <input type="password" id="pass-input" placeholder="Enter Password..." class="w-full p-5 rounded-2xl text-center text-lg outline-none">
-                <button onclick="checkAuth()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase text-xs tracking-widest hover:bg-zinc-200">Enter Dashboard</button>
+                <input type="password" id="pass-input" placeholder="Masukkan Password..." class="w-full p-5 rounded-2xl text-center text-lg outline-none">
+                <button onclick="checkAuth()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase text-xs tracking-widest hover:bg-zinc-200">Masuk ke Dashboard</button>
             </div>
         </div>
     </div>
@@ -126,10 +126,10 @@
                     <div class="space-y-2">
                         <label class="text-[10px] font-bold uppercase text-zinc-500 ml-2">Category</label>
                         <select id="in-cat" onchange="toggleFormUI()" class="w-full p-4 rounded-xl">
-                            <option value="Apparel">Apparel</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Cans">Cans</option>
-                            <option value="Others">Others</option>
+                            <option value="APPAREL">APPAREL</option>
+                            <option value="ACCESSORIES">ACCESSORIES</option>
+                            <option value="CANS">CANS</option>
+                            <option value="OTHERS">OTHERS</option>
                         </select>
                     </div>
                     <div class="space-y-2">
@@ -140,7 +140,7 @@
 
                 <div class="space-y-2">
                     <label class="text-[10px] font-bold uppercase text-zinc-500 ml-2">Product Name</label>
-                    <input type="text" id="in-name" placeholder="E.g. Ritus Classic Tees Black..." class="w-full p-4 rounded-xl text-lg font-bold">
+                    <input type="text" id="in-name" placeholder="E.g. Ritus Classic Tees Black..." class="w-full p-4 rounded-xl text-lg font-bold uppercase">
                 </div>
 
                 <div class="grid grid-cols-2 gap-6 p-6 bg-white/[0.01] border border-white/5 rounded-2xl">
@@ -184,7 +184,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-[10px] font-bold uppercase text-zinc-500 ml-1">Detail Info (Color/Volume)</label>
-                            <input type="text" id="gen-info" placeholder="Black / 400ml / Silver" class="w-full p-4 rounded-xl">
+                            <input type="text" id="gen-info" placeholder="Black / 400ml / Silver" class="w-full p-4 rounded-xl uppercase">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-bold uppercase text-zinc-500 ml-1">Quantity</label>
@@ -205,10 +205,10 @@
                     <div class="flex gap-4">
                         <select id="inv-filter-cat" onchange="renderInventory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest cursor-pointer">
                             <option value="ALL">All Categories</option>
-                            <option value="Apparel">Apparel</option>
-                            <option value="Cans">Cans</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Others">Others</option>
+                            <option value="APPAREL">APPAREL</option>
+                            <option value="CANS">CANS</option>
+                            <option value="ACCESSORIES">ACCESSORIES</option>
+                            <option value="OTHERS">OTHERS</option>
                         </select>
                         <select id="inv-sort" onchange="renderInventory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest cursor-pointer">
                             <option value="default">Default Order</option>
@@ -219,7 +219,7 @@
                 </div>
                 <div class="relative">
                     <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
-                    <input type="text" id="inv-search" onkeyup="renderInventory()" placeholder="Search Products..." class="p-4 pl-12 pr-6 rounded-full text-xs w-80 bg-zinc-900 border-none outline-none">
+                    <input type="text" id="inv-search" onkeyup="renderInventory()" placeholder="Search Products..." class="p-4 pl-12 pr-6 rounded-full text-xs w-80 bg-zinc-900 border-none outline-none uppercase">
                 </div>
             </div>
             <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -232,10 +232,10 @@
                 <div class="flex gap-4">
                     <select id="hist-filter-cat" onchange="renderHistory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest">
                         <option value="ALL">All Categories</option>
-                        <option value="Apparel">Apparel</option>
-                        <option value="Cans">Cans</option>
-                        <option value="Accessories">Accessories</option>
-                        <option value="Others">Others</option>
+                        <option value="APPAREL">APPAREL</option>
+                        <option value="CANS">CANS</option>
+                        <option value="ACCESSORIES">ACCESSORIES</option>
+                        <option value="OTHERS">OTHERS</option>
                     </select>
                     <select id="hist-filter-type" onchange="renderHistory()" class="p-3 px-6 rounded-full text-[10px] bg-zinc-900 border-none font-bold uppercase tracking-widest">
                         <option value="ALL">All Flows</option>
@@ -244,7 +244,7 @@
                     </select>
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
-                        <input type="text" id="hist-search" onkeyup="renderHistory()" placeholder="Search History..." class="p-3 pl-10 rounded-full text-[10px] bg-zinc-900 border-none w-64 outline-none">
+                        <input type="text" id="hist-search" onkeyup="renderHistory()" placeholder="Search History..." class="p-3 pl-10 rounded-full text-[10px] bg-zinc-900 border-none w-64 outline-none uppercase">
                     </div>
                 </div>
             </div>
@@ -442,7 +442,7 @@
         let apparelType = 'standard';
         let currentChartType = 'doughnut';
         let currentChartFilter = 'ALL';
-        let transactionCart = []; // Variabel penampung keranjang transaksi massal
+        let transactionCart = [];
         const PASSWORDS = ["RITUSSTREET2026", "RITUSMAKASSAR", "RITUS202626"];
 
         function formatDate(date = new Date()) {
@@ -454,9 +454,10 @@
 
         function formatDisplayDate(dateStr) {
             if (!dateStr) return '-';
-            if (dateStr.includes('/')) return dateStr;
-            const date = new Date(dateStr);
-            if (isNaN(date)) return dateStr;
+            let cleaned = dateStr.toString().trim();
+            if (cleaned.includes('/')) return cleaned;
+            const date = new Date(cleaned);
+            if (isNaN(date)) return cleaned;
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
@@ -468,10 +469,10 @@
             return "Rp " + Number(num).toLocaleString('id-ID');
         }
 
-        // Fungsi pembersih mata uang Indonesia agar dapat dikonversi menjadi tipe Angka murni
+        // Pembersihan mata uang Indonesia murni agar aman dikonversi menjadi Number
         function parseIndonesianCurrency(str) {
             if (!str) return 0;
-            let cleaned = str.trim()
+            let cleaned = str.toString().trim()
                 .replace(/Rp/gi, '')
                 .replace(/\s/g, '')
                 .replace(/\./g, '')
@@ -481,62 +482,108 @@
             return isNaN(parsed) ? 0 : parsed;
         }
 
-        // Fungsi pembersih mata uang Indonesia agar dapat dikonversi menjadi tipe Angka murni atau default ke 'SYSTEM_IMPORT' jika data kosong
         function parseIndonesianOperator(str) {
             if (!str) return 'SYSTEM_IMPORT';
-            const cleaned = str.trim().toUpperCase();
+            const cleaned = str.toString().trim().toUpperCase();
             return cleaned === '' ? 'SYSTEM_IMPORT' : cleaned;
         }
 
-        // Auth Logic
-        async function initAuth() {
-            try {
-                await signInAnonymously(auth);
-                console.log("AUTH USER:", auth.currentUser);
-            } catch (error) {
-                console.error("Auth Failure:", error);
-            }
-        }
-
-        window.checkAuth = async function() {
-            const val = document.getElementById('pass-input').value;
-            if (PASSWORDS.includes(val)) {
-                showToast("Login berhasil!");
-                await initAuth();
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-sidebar').classList.remove('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-            } else {
-                showToast("❌ Password Salah!", true);
-                document.getElementById('pass-input').value = "";
-                document.getElementById('pass-input').focus();
-            }
-        };
-
-        // Real-time Data Sync
-        onAuthStateChanged(auth, (user) => {
-            if (!user) return;
+        // Setup real-time listener di luar trigger login agar sinkronisasi langsung jalan setelah login sukses
+        function startRealtimeSync() {
             const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
             if (unsubscribeSnap) unsubscribeSnap();
+            
             unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
-                localDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                localDB = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    return { 
+                        id: doc.id, 
+                        ...d,
+                        // Menyeragamkan data untuk menghindari inkonsistensi string
+                        name: (d.name || '').trim().toUpperCase(),
+                        info: (d.info || 'STD').trim().toUpperCase(),
+                        category: (d.category || 'OTHERS').trim().toUpperCase(),
+                        operator: (d.operator || 'SYSTEM_IMPORT').trim().toUpperCase(),
+                        type: (d.type || '').trim().toUpperCase() // IN / OUT standarisasi huruf besar
+                    };
+                });
+                
                 localDB.sort((a, b) => {
                     const parseDate = (str) => {
+                        if (!str) return new Date(0);
                         const parts = str.split('/');
                         if(parts.length !== 3) return new Date(str);
                         return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
                     };
                     return parseDate(b.date) - parseDate(a.date);
                 });
+                
                 requestAnimationFrame(() => {
                     updateDashboard();
                     renderInventory();
                     renderHistory();
                 });
             }, (error) => {
-                if(error.code === 'permission-denied') showToast("Sesi habis, harap refresh", true);
+                console.error("Firestore Listener Error: ", error);
+                if(error.code === 'permission-denied') {
+                    showToast("Sesi habis, harap login kembali.", true);
+                }
             });
+        }
+
+        // Alur Autentikasi Pengamat Resmi (State Observer) Firebase yang aman dari Refresh
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("Firebase Auth: Terautentikasi.", user.uid);
+                localStorage.setItem('ritus_authenticated', 'true');
+                
+                // Masuk langsung ke dashboard
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-sidebar').classList.remove('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                
+                // Hubungkan sinkronisasi data real-time
+                startRealtimeSync();
+            } else {
+                console.log("Firebase Auth: Tidak ada sesi.");
+                const isSavedAuth = localStorage.getItem('ritus_authenticated');
+                if (isSavedAuth === 'true') {
+                    try {
+                        showToast("Memulihkan sesi...");
+                        await signInAnonymously(auth);
+                    } catch (err) {
+                        console.error("Gagal pemulihan sesi otomatis:", err);
+                        localStorage.removeItem('ritus_authenticated');
+                        showLoginUI();
+                    }
+                } else {
+                    showLoginUI();
+                }
+            }
         });
+
+        function showLoginUI() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-sidebar').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+        }
+
+        window.checkAuth = async function() {
+            const val = document.getElementById('pass-input').value;
+            if (PASSWORDS.includes(val)) {
+                showToast("Memverifikasi...");
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Authentication Error: ", error);
+                    showToast("❌ Gagal terhubung ke server!", true);
+                }
+            } else {
+                showToast("❌ Password Salah!", true);
+                document.getElementById('pass-input').value = "";
+                document.getElementById('pass-input').focus();
+            }
+        };
 
         // Tab Navigation
         window.switchTab = (id) => {
@@ -555,7 +602,7 @@
         };
 
         window.setChartFilter = (f) => {
-            currentChartFilter = f;
+            currentChartFilter = f.toUpperCase();
             ['all', 'in', 'out'].forEach(id => {
                 const el = document.getElementById(`cf-${id}`);
                 if(el) el.className = `px-6 py-2 rounded-full border border-white/20 text-[10px] font-bold tracking-widest ${id === f.toLowerCase() ? 'bg-white text-black' : ''}`;
@@ -567,26 +614,29 @@
         function updateDashboard() {
             const skus = new Set(localDB.map(x => x.name));
             const prodStock = {};
-            localDB.forEach(t => { prodStock[t.name] = (prodStock[t.name] || 0) + (t.type === 'In' ? t.qty : -t.qty); });
+            localDB.forEach(t => { 
+                const net = ((t.type || '').trim().toUpperCase() === 'IN' ? t.qty : -t.qty);
+                prodStock[t.name] = (prodStock[t.name] || 0) + net; 
+            });
             
             document.getElementById('dash-active').innerText = skus.size;
             document.getElementById('dash-empty').innerText = Object.values(prodStock).filter(v => v === 0).length;
-            document.getElementById('dash-in').innerText = localDB.filter(x => x.type === 'In').reduce((a,b)=>a+b.qty, 0);
-            document.getElementById('dash-out').innerText = localDB.filter(x => x.type === 'Out').reduce((a,b)=>a+b.qty, 0);
+            document.getElementById('dash-in').innerText = localDB.filter(x => (x.type || '').trim().toUpperCase() === 'IN').reduce((a,b)=>a+b.qty, 0);
+            document.getElementById('dash-out').innerText = localDB.filter(x => (x.type || '').trim().toUpperCase() === 'OUT').reduce((a,b)=>a+b.qty, 0);
             
-            // Perhitungan Finansial Dashboard
-            let totalCapital = 0; // Modal dari stok barang masuk (In)
-            let totalGross = 0;   // Pendapatan kotor dari barang keluar (Out)
-            let totalNet = 0;     // Laba bersih dari selisih jual-beli barang keluar (Out)
+            let totalCapital = 0;
+            let totalGross = 0;
+            let totalNet = 0;
 
             localDB.forEach(t => {
                 const qty = t.qty || 0;
                 const cap = t.capitalPrice || 0;
                 const sell = t.sellingPrice || 0;
+                const typeUpper = (t.type || '').trim().toUpperCase();
 
-                if (t.type === 'In') {
+                if (typeUpper === 'IN') {
                     totalCapital += (qty * cap);
-                } else if (t.type === 'Out') {
+                } else if (typeUpper === 'OUT') {
                     totalGross += (qty * sell);
                     totalNet += (qty * (sell - cap));
                 }
@@ -596,13 +646,13 @@
             document.getElementById('dash-gross').innerText = formatRupiah(totalGross);
             document.getElementById('dash-net').innerText = formatRupiah(totalNet);
 
-            const categories = ["Apparel", "Accessories", "Cans", "Others"];
+            const categories = ["APPAREL", "ACCESSORIES", "CANS", "OTHERS"];
             const catData = categories.map(cat => {
                 const filtered = localDB.filter(x => x.category === cat);
                 if (currentChartFilter === 'ALL') {
-                    return filtered.reduce((a,b) => a + (b.type === 'In' ? b.qty : -b.qty), 0);
+                    return filtered.reduce((a,b) => a + ((b.type || '').trim().toUpperCase() === 'IN' ? b.qty : -b.qty), 0);
                 } else {
-                    return filtered.filter(x => x.type === currentChartFilter).reduce((a,b) => a + b.qty, 0);
+                    return filtered.filter(x => (x.type || '').trim().toUpperCase() === currentChartFilter).reduce((a,b) => a + b.qty, 0);
                 }
             });
 
@@ -633,12 +683,7 @@
                                 label: function(context) {
                                     let label = context.label || '';
                                     if (label) label += ': ';
-                                    let val;
-                                    if (currentChartType === 'bar') {
-                                        val = context.parsed.y;
-                                    } else {
-                                        val = context.parsed;
-                                    }
+                                    let val = currentChartType === 'bar' ? context.parsed.y : context.parsed;
                                     let total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     let percentage = total > 0 ? Math.round((val * 100) / total) : 0;
                                     return `${label}${val} Units (${percentage}%)`;
@@ -657,8 +702,8 @@
         // --- ADD STOCK LOGIC ---
         window.toggleFormUI = () => {
             const cat = document.getElementById('in-cat').value;
-            document.getElementById('ui-apparel-wrapper').style.display = (cat === 'Apparel') ? 'block' : 'none';
-            document.getElementById('ui-generic').style.display = (cat === 'Apparel') ? 'none' : 'block';
+            document.getElementById('ui-apparel-wrapper').style.display = (cat === 'APPAREL') ? 'block' : 'none';
+            document.getElementById('ui-generic').style.display = (cat === 'APPAREL') ? 'none' : 'block';
         };
 
         window.setApparelType = (type) => {
@@ -685,8 +730,8 @@
         window.saveNewProduct = async () => {
             if (!auth.currentUser) return showToast("Sesi tidak valid", true);
             const dateStr = document.getElementById('in-date').value;
-            const cat = document.getElementById('in-cat').value;
-            const name = document.getElementById('in-name').value;
+            const cat = document.getElementById('in-cat').value.trim().toUpperCase();
+            const name = document.getElementById('in-name').value.trim().toUpperCase();
             const operator = document.getElementById('in-operator').value.trim().toUpperCase() || 'ADMIN';
             
             const capitalPrice = parseFloat(document.getElementById('in-price-capital').value) || 0;
@@ -698,25 +743,62 @@
             const date = formatDate(dateObj);
 
             const batch = [];
-            if(cat === 'Apparel') {
+            if(cat === 'APPAREL') {
                 if (apparelType === 'standard') {
-                    document.querySelectorAll('.variant-input').forEach(inp => {
+                    // Cari hanya di standard-sizes yang aktif saat ini
+                    document.querySelectorAll('#standard-sizes .variant-input').forEach(inp => {
                         const q = parseInt(inp.value);
-                        if(q > 0) batch.push({ date, name, info: inp.dataset.var, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                        if(!isNaN(q) && q > 0) {
+                            batch.push({ 
+                                date, 
+                                name, 
+                                info: inp.dataset.var.trim().toUpperCase(), 
+                                category: cat, 
+                                type: 'In', 
+                                qty: q, 
+                                capitalPrice, 
+                                sellingPrice, 
+                                operator 
+                            });
+                        }
                     });
                 } else {
-                    const names = document.querySelectorAll('.cst-var-name');
-                    const qtys = document.querySelectorAll('.cst-var-qty');
+                    const names = document.querySelectorAll('#custom-sizes .cst-var-name');
+                    const qtys = document.querySelectorAll('#custom-sizes .cst-var-qty');
                     names.forEach((nInput, i) => {
                         const vName = nInput.value.trim().toUpperCase();
                         const q = parseInt(qtys[i].value);
-                        if (vName && q > 0) batch.push({ date, name, info: vName, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                        if (vName && !isNaN(q) && q > 0) {
+                            batch.push({ 
+                                date, 
+                                name, 
+                                info: vName, 
+                                category: cat, 
+                                type: 'In', 
+                                qty: q, 
+                                capitalPrice, 
+                                sellingPrice, 
+                                operator 
+                            });
+                        }
                     });
                 }
             } else {
                 const q = parseInt(document.getElementById('gen-qty').value);
-                const info = document.getElementById('gen-info').value || 'Std';
-                if(q > 0) batch.push({ date, name, info, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                const info = document.getElementById('gen-info').value.trim().toUpperCase() || 'STD';
+                if(!isNaN(q) && q > 0) {
+                    batch.push({ 
+                        date, 
+                        name, 
+                        info, 
+                        category: cat, 
+                        type: 'In', 
+                        qty: q, 
+                        capitalPrice, 
+                        sellingPrice, 
+                        operator 
+                    });
+                }
             }
 
             if(batch.length === 0) return showToast("Masukkan Jumlah Stok yang valid!", true);
@@ -784,9 +866,10 @@
             let totalRevOut = 0;
 
             transactionCart.forEach((item, idx) => {
-                if (item.type === 'In') {
+                const typeUpper = (item.type || '').trim().toUpperCase();
+                if (typeUpper === 'IN') {
                     totalIn += item.qty;
-                } else if (item.type === 'Out') {
+                } else if (typeUpper === 'OUT') {
                     totalOut += item.qty;
                     totalRevOut += (item.qty * item.sellingPrice);
 
@@ -823,7 +906,7 @@
             }
 
             listContainer.innerHTML = transactionCart.map((item, idx) => {
-                const isOut = item.type === 'Out';
+                const isOut = (item.type || '').trim().toUpperCase() === 'OUT';
                 const flowBadge = isOut 
                     ? '<span class="px-2 py-1 bg-rose-500/15 text-rose-400 border border-rose-500/20 text-[9px] font-black rounded uppercase">OUT</span>'
                     : '<span class="px-2 py-1 bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-[9px] font-black rounded uppercase">IN</span>';
@@ -894,7 +977,7 @@
         window.processBulkTransactions = async () => {
             const opName = document.getElementById('cart-operator').value.trim().toUpperCase();
             if (!opName) {
-                return showToast("Masukkan Nama Petugas / PIC!", true);
+                return showToast("Masukkan Nama PIC!", true);
             }
 
             if (isProcessing) return;
@@ -912,10 +995,10 @@
                 for (const item of transactionCart) {
                     const payload = {
                         date: formatDate(),
-                        name: item.name,
-                        info: item.info,
-                        category: item.category,
-                        type: item.type,
+                        name: item.name.trim().toUpperCase(),
+                        info: item.info.trim().toUpperCase(),
+                        category: item.category.trim().toUpperCase(),
+                        type: (item.type || '').trim().toUpperCase(),
                         qty: item.qty,
                         capitalPrice: item.capitalPrice,
                         sellingPrice: item.sellingPrice,
@@ -958,7 +1041,7 @@
                 const operator = document.getElementById('edit-price-operator').value.trim().toUpperCase();
                 
                 if (!operator) {
-                    return showToast("Masukkan Nama Petugas / PIC!", true);
+                    return showToast("Masukkan Nama PIC!", true);
                 }
                 
                 if (isProcessing) return;
@@ -969,16 +1052,14 @@
                 try {
                     if (!auth.currentUser) throw new Error("Autentikasi Invalid");
                     
-                    // Filter semua dokumen transaksi yang cocok dengan nama & kategori SKU ini
-                    const toUpdate = localDB.filter(x => x.name === name && x.category === cat);
+                    const toUpdate = localDB.filter(x => x.name.trim().toUpperCase() === name.trim().toUpperCase() && x.category.trim().toUpperCase() === cat.trim().toUpperCase());
                     
-                    // Proses update harga ke database satu per satu
                     for (const item of toUpdate) {
                         const docRef = doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id);
                         await updateDoc(docRef, {
                             capitalPrice: newCapital,
                             sellingPrice: newSelling,
-                            operator: operator // PIC terakhir yang memodifikasi harga
+                            operator: operator
                         });
                     }
                     
@@ -1000,13 +1081,20 @@
 
         // --- INVENTORY LOGIC ---
         window.renderInventory = () => {
-            const search = document.getElementById('inv-search').value.toLowerCase();
-            const catFilter = document.getElementById('inv-filter-cat').value;
+            const search = document.getElementById('inv-search').value.trim().toUpperCase();
+            const catFilter = document.getElementById('inv-filter-cat').value.trim().toUpperCase();
             const sortMode = document.getElementById('inv-sort').value;
             
             const products = {};
             localDB.forEach(t => {
-                const key = `${t.name}|||${t.category}`;
+                const safeName = (t.name || '').trim().toUpperCase();
+                const safeCat = (t.category || 'OTHERS').trim().toUpperCase();
+                const safeInfo = (t.info || 'STD').trim().toUpperCase();
+                const safeType = (t.type || '').trim().toUpperCase();
+                
+                if (!safeName) return;
+
+                const key = `${safeName}|||${safeCat}`;
                 if(!products[key]) {
                     products[key] = { 
                         variants: {}, 
@@ -1015,27 +1103,46 @@
                         sellingPrice: 0
                     };
                 }
-                const net = (t.type === 'In' ? t.qty : -t.qty);
-                products[key].variants[t.info] = (products[key].variants[t.info] || 0) + net;
+                const net = (safeType === 'IN' ? t.qty : -t.qty);
+                products[key].variants[safeInfo] = (products[key].variants[safeInfo] || 0) + net;
                 products[key].total += net;
                 
-                // Set harga dari transaksi pertama yang valid (paling baru karena array terurut descending)
                 if (products[key].capitalPrice === 0 && t.capitalPrice !== undefined) products[key].capitalPrice = t.capitalPrice;
                 if (products[key].sellingPrice === 0 && t.sellingPrice !== undefined) products[key].sellingPrice = t.sellingPrice;
             });
 
             let entries = Object.entries(products);
             if(catFilter !== 'ALL') entries = entries.filter(([k]) => k.split('|||')[1] === catFilter);
-            if(search) entries = entries.filter(([k]) => k.toLowerCase().includes(search));
+            if(search) entries = entries.filter(([k]) => k.split('|||')[0].includes(search));
             if(sortMode === 'highest') entries.sort((a, b) => b[1].total - a[1].total);
             if(sortMode === 'lowest') entries.sort((a, b) => a[1].total - b[1].total);
 
             const grid = document.getElementById('inventory-grid');
             if(!grid) return;
+            
+            if (entries.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-500 font-bold uppercase text-xs tracking-wider">SKU tidak ditemukan</div>`;
+                return;
+            }
+
             grid.innerHTML = entries.map(([key, data]) => {
                 const [name, cat] = key.split('|||');
                 let varHTML = "";
-                Object.entries(data.variants).forEach(([vName, vQty]) => {
+                
+                // Urutkan varian agar S, M, L, XL, XXL berurutan rapi di antrean visual
+                const orderMap = { "S": 1, "M": 2, "L": 3, "XL": 4, "XXL": 5 };
+                const sortedVariants = Object.entries(data.variants).sort((a, b) => {
+                    const valA = orderMap[a[0]] || 99;
+                    const valB = orderMap[b[0]] || 99;
+                    return valA - valB;
+                });
+
+                sortedVariants.forEach(([vName, vQty]) => {
+                    // Gunakan ID input unik dengan kombinasi aman base64 atau string sederhana
+                    const safeNameId = btoa(encodeURIComponent(name)).replace(/[^A-Za-z0-9]/g, '');
+                    const safeVarId = btoa(encodeURIComponent(vName)).replace(/[^A-Za-z0-9]/g, '');
+                    const elId = `inp-${safeNameId}-${safeVarId}`;
+                    
                     varHTML += `
                         <div class="flex justify-between items-center p-3 bg-white/[0.03] border border-white/5 rounded-xl mb-1">
                             <div class="flex-1">
@@ -1043,23 +1150,20 @@
                                 <p class="font-bold text-xs ${vQty <= 0 ? 'text-rose-500' : 'text-white'}">${vQty} units</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="number" id="inp-${name.replace(/\s+/g,'')}-${vName.replace(/\s+/g,'')}" placeholder="0" class="w-12 p-2 text-center text-xs font-bold rounded bg-zinc-900 border-none outline-none">
-                                <button onclick="triggerMove('${name}','${vName}','${cat}','In', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-black transition-all text-[10px] flex items-center justify-center"><i class="fas fa-plus"></i></button>
-                                <button onclick="triggerMove('${name}','${vName}','${cat}','Out', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all text-[10px] flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="${elId}" placeholder="0" class="w-12 p-2 text-center text-xs font-bold rounded bg-zinc-900 border-none outline-none">
+                                <button onclick="triggerMove('${name.replace(/'/g, "\\'")}', '${vName.replace(/'/g, "\\'")}', '${cat}', 'In', ${data.capitalPrice}, ${data.sellingPrice}, '${elId}')" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-black transition-all text-[10px] flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                <button onclick="triggerMove('${name.replace(/'/g, "\\'")}', '${vName.replace(/'/g, "\\'")}', '${cat}', 'Out', ${data.capitalPrice}, ${data.sellingPrice}, '${elId}')" class="w-8 h-8 rounded bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all text-[10px] flex items-center justify-center"><i class="fas fa-minus"></i></button>
                             </div>
                         </div>`;
                 });
 
                 return `
                     <div class="sku-card glass-card p-6 flex flex-col h-full relative group">
-                        <!-- BUTTONS: TOP RIGHT -->
                         <div class="absolute top-4 right-4 flex items-center gap-1">
-                            <!-- Tombol 3 Titik Edit Harga (Baru) -->
-                            <button onclick="triggerEditPrice('${name}','${cat}', ${data.capitalPrice}, ${data.sellingPrice})" class="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white text-xs transition-all p-2" title="Edit Harga SKU">
+                            <button onclick="triggerEditPrice('${name.replace(/'/g, "\\'")}','${cat}', ${data.capitalPrice}, ${data.sellingPrice})" class="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white text-xs transition-all p-2" title="Edit Harga SKU">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
-                            <!-- Tombol Hapus SKU -->
-                            <button onclick="triggerDeleteSKU('${name}','${cat}')" class="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-400 text-xs transition-all p-2" title="Hapus SKU">
+                            <button onclick="triggerDeleteSKU('${name.replace(/'/g, "\\'")}','${cat}')" class="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-400 text-xs transition-all p-2" title="Hapus SKU">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -1096,32 +1200,37 @@
             }).join('');
         };
 
-        window.triggerMove = (name, info, cat, type, capitalPrice = 0, sellingPrice = 0) => {
-            const elId = `inp-${name.replace(/\s+/g,'')}-${info.replace(/\s+/g,'')}`;
-            const el = document.getElementById(elId);
+        window.triggerMove = (name, info, cat, type, capitalPrice = 0, sellingPrice = 0, inputElementId) => {
+            const el = document.getElementById(inputElementId);
+            if (!el) return;
             const val = parseInt(el.value);
             if(!val || val <= 0) return showToast("Masukkan jumlah yang benar!", true);
 
+            const cleanName = name.trim().toUpperCase();
+            const cleanInfo = info.trim().toUpperCase();
+            const cleanCat = cat.trim().toUpperCase();
+            const typeUpper = type.trim().toUpperCase();
+
             const alreadyInCartOut = transactionCart
-                .filter(x => x.name === name && x.info === info && x.type === 'Out')
+                .filter(x => x.name === cleanName && x.info === cleanInfo && (x.type || '').trim().toUpperCase() === 'OUT')
                 .reduce((a, c) => a + c.qty, 0);
 
-            if(type === 'Out') {
-                const stock = localDB.filter(x => x.name === name && x.info === info).reduce((a,c)=>a+(c.type==='In'?c.qty:-c.qty),0);
+            if(typeUpper === 'OUT') {
+                const stock = localDB.filter(x => x.name === cleanName && x.info === cleanInfo).reduce((a,c)=>a+(((c.type || '').trim().toUpperCase() === 'IN')?c.qty:-c.qty),0);
                 if((val + alreadyInCartOut) > stock) {
                     return showToast(`Stok ${info} kurang! Sisa: ${stock} pcs (Sudah ada di antrean out: ${alreadyInCartOut} pcs)`, true);
                 }
             }
 
-            const existingIndex = transactionCart.findIndex(x => x.name === name && x.info === info && x.type === type);
+            const existingIndex = transactionCart.findIndex(x => x.name === cleanName && x.info === cleanInfo && (x.type || '').trim().toUpperCase() === typeUpper);
             if (existingIndex > -1) {
                 transactionCart[existingIndex].qty += val;
             } else {
                 transactionCart.push({
-                    name, 
-                    info, 
-                    category: cat, 
-                    type, 
+                    name: cleanName, 
+                    info: cleanInfo, 
+                    category: cleanCat, 
+                    type: typeUpper, 
                     qty: val, 
                     capitalPrice, 
                     sellingPrice,
@@ -1142,7 +1251,7 @@
                 if(document.getElementById('delete-sku-verify').value === 'DELETE') {
                     if (!auth.currentUser) return;
                     showToast("Sedang menghapus SKU...", true);
-                    const toDelete = localDB.filter(x => x.name === name && x.category === cat);
+                    const toDelete = localDB.filter(x => x.name.trim().toUpperCase() === name.trim().toUpperCase() && x.category.trim().toUpperCase() === cat.trim().toUpperCase());
                     for (const item of toDelete) {
                         await deleteDoc(doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id));
                     }
@@ -1158,32 +1267,35 @@
         // --- HISTORY ---
         window.renderHistory = () => {
             const search = document.getElementById('hist-search').value.toLowerCase();
-            const typeF = document.getElementById('hist-filter-type').value;
-            const catF = document.getElementById('hist-filter-cat').value;
+            const typeF = document.getElementById('hist-filter-type').value.toUpperCase();
+            const catF = document.getElementById('hist-filter-cat').value.toUpperCase();
             
             let data = localDB.filter(x => {
                 const matchSearch = x.name.toLowerCase().includes(search) || (x.info && x.info.toLowerCase().includes(search)) || (x.operator && x.operator.toLowerCase().includes(search));
-                const matchType = typeF === 'ALL' || x.type === typeF;
+                const matchType = typeF === 'ALL' || (x.type || '').trim().toUpperCase() === typeF;
                 const matchCat = catF === 'ALL' || x.category === catF;
                 return matchSearch && matchType && matchCat;
             });
 
             const body = document.getElementById('history-body');
             if(!body) return;
-            body.innerHTML = data.map(t => `
-                <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
-                    <td class="px-6 py-4 opacity-40">${t.date}</td>
-                    <td class="px-6 py-4 font-bold uppercase text-white">${t.name}</td>
-                    <td class="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase">${t.category}</td>
-                    <td class="px-6 py-4 text-zinc-400 font-bold uppercase">${t.info}</td>
-                    <td class="px-6 py-4 text-zinc-400">
-                        <div class="text-[10px]">M: <span class="text-amber-500 font-bold">${formatRupiah(t.capitalPrice)}</span></div>
-                        <div class="text-[10px]">J: <span class="text-emerald-500 font-bold">${formatRupiah(t.sellingPrice)}</span></div>
-                    </td>
-                    <td class="px-6 py-4 font-extrabold uppercase text-zinc-300 text-[10px] tracking-wider">${t.operator || '-'}</td>
-                    <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded text-[8px] font-black uppercase ${t.type==='In'?'bg-emerald-500/10 text-emerald-500':'bg-rose-500/10 text-rose-500'}">${t.type}</span></td>
-                    <td class="px-6 py-4 text-right font-black ${t.type==='In'?'text-emerald-500':'text-rose-400'}">${t.type==='In'?'+':'-'}${t.qty}</td>
-                </tr>`).join('');
+            body.innerHTML = data.map(t => {
+                const isIncoming = (t.type || '').trim().toUpperCase() === 'IN';
+                return `
+                    <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
+                        <td class="px-6 py-4 opacity-40">${t.date}</td>
+                        <td class="px-6 py-4 font-bold uppercase text-white">${t.name}</td>
+                        <td class="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase">${t.category}</td>
+                        <td class="px-6 py-4 text-zinc-400 font-bold uppercase">${t.info}</td>
+                        <td class="px-6 py-4 text-zinc-400">
+                            <div class="text-[10px]">M: <span class="text-amber-500 font-bold">${formatRupiah(t.capitalPrice)}</span></div>
+                            <div class="text-[10px]">J: <span class="text-emerald-500 font-bold">${formatRupiah(t.sellingPrice)}</span></div>
+                        </td>
+                        <td class="px-6 py-4 font-extrabold uppercase text-zinc-300 text-[10px] tracking-wider">${t.operator || '-'}</td>
+                        <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded text-[8px] font-black uppercase ${isIncoming ?'bg-emerald-500/10 text-emerald-500':'bg-rose-500/10 text-rose-500'}">${t.type}</span></td>
+                        <td class="px-6 py-4 text-right font-black ${isIncoming ?'text-emerald-500':'text-rose-400'}">${isIncoming ?'+':'-'}${t.qty}</td>
+                    </tr>`;
+            }).join('');
         };
 
         // --- CSV IMPORT / EXPORT ---
@@ -1205,42 +1317,47 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 if(!auth.currentUser) return;
-                const lines = e.target.result.split('\n');
+                
+                // Pisahkan baris menggunakan regex aman dari karakter Carriage Return (\r\n)
+                const lines = e.target.result.split(/\r?\n/);
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
                 let count = 0;
                 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if(!line) continue;
+                    
                     const parts = line.split(';');
                     if(parts.length < 6) continue;
                     
-                    let cat = parts[3].trim();
-                    const catLower = cat.toLowerCase();
-                    if (catLower.includes('acc')) { cat = 'Accessories'; }
-                    else if (catLower === 'apparel') { cat = 'Apparel'; }
-                    else if (catLower === 'cans') { cat = 'Cans'; }
-                    else { cat = 'Others'; }
+                    let cat = parts[3].trim().toUpperCase();
+                    if (cat.includes('ACC')) { cat = 'ACCESSORIES'; }
+                    else if (cat === 'APPAREL') { cat = 'APPAREL'; }
+                    else if (cat === 'CANS') { cat = 'CANS'; }
+                    else { cat = 'OTHERS'; }
 
                     const capitalPrice = parts[6] ? parseIndonesianCurrency(parts[6]) : 0;
                     const sellingPrice = parts[7] ? parseIndonesianCurrency(parts[7]) : 0;
-                    
                     const operator = parts[8] ? parseIndonesianOperator(parts[8]) : 'SYSTEM_IMPORT';
 
-                    await addDoc(colRef, { 
+                    const itemPayload = { 
                         date: parts[0].trim(), 
-                        name: parts[1].trim(), 
-                        info: parts[2].trim(), 
+                        name: parts[1].trim().toUpperCase(), 
+                        info: parts[2].trim().toUpperCase(), 
                         category: cat, 
-                        type: parts[4].trim(), 
-                        qty: parseInt(parts[5].trim()),
+                        type: parts[4].trim().toUpperCase(), // IN / OUT standarisasi kapital penuh
+                        qty: parseInt(parts[5].trim()) || 0,
                         capitalPrice,
                         sellingPrice,
                         operator
-                    });
-                    count++;
+                    };
+
+                    if (itemPayload.name && itemPayload.qty > 0) {
+                        await addDoc(colRef, itemPayload);
+                        count++;
+                    }
                 }
-                showToast(`Import Berhasil: ${count} Logs ditambahkan`, false);
+                showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
             };
             reader.readAsText(file);
