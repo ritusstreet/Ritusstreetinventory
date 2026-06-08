@@ -1402,21 +1402,26 @@ for (let i = 1; i < lines.length; i++) {
 
     console.log("AKAN DISIMPAN:", itemPayload);
 
-    try {
+try {
 
-        const docRef = await addDoc(colRef, itemPayload);
+    console.log("SEBELUM addDoc");
 
-        console.log("BERHASIL:", docRef.id);
+    const docRef = await addDoc(colRef, itemPayload);
 
-        count++;
+    console.log("SETELAH addDoc");
 
-    } catch(err) {
+    console.log("BERHASIL:", docRef.id);
 
-        console.error("GAGAL:", err);
+    count++;
 
-    }
+} catch(err) {
+
+    console.error("GAGAL IMPORT:", err);
+
+}
                     }
 }
+               console.log("LOOP SELESAI");
                 console.log("Total berhasil diimport:", count);
                 showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
