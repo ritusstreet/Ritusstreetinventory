@@ -433,6 +433,7 @@
         };
         
         const app = initializeApp(firebaseConfig);
+        console.log("PROJECT ID:", firebaseConfig.projectId);
         console.log("Firebase initialized");
         const auth = getAuth(app);
         const db_fs = getFirestore(app);
@@ -731,7 +732,18 @@
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
 
                 for (const item of batch) {
-                    await addDoc(colRef, item);
+                   try {
+    const ref = await addDoc(colRef, payload);
+
+    console.log("SUCCESS");
+    console.log(ref.id);
+
+} catch (err) {
+
+    console.error("ADD DOC ERROR");
+    console.error(err);
+
+}
                 }
 
                 showToast("Produk berhasil ditambahkan!");
