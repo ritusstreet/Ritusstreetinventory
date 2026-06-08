@@ -38,30 +38,6 @@
         </div>
     </div>
 
-    <!-- ANONYMOUS AUTH ERROR MODAL GUIDE -->
-    <div id="modal-auth-warning" class="fixed inset-0 z-[1000] modal-overlay flex items-center justify-center p-6 hidden">
-        <div class="glass-card w-full max-w-lg p-10 space-y-6 border border-rose-500/30">
-            <div class="flex items-center gap-3 text-rose-500">
-                <i class="fas fa-exclamation-triangle text-3xl"></i>
-                <h3 class="text-xl font-black italic uppercase">Anonymous Auth Belum Aktif!</h3>
-            </div>
-            <p class="text-xs text-zinc-400 leading-relaxed font-semibold">
-                Sistem mendeteksi bahwa fitur penyimpanan Anda belum berfungsi karena **Anonymous Sign-In** belum diaktifkan pada Firebase Console proyek Anda.
-            </p>
-            <div class="bg-white/[0.02] p-5 rounded-2xl border border-white/5 space-y-3 text-xs text-zinc-300">
-                <p class="font-bold text-white"><i class="fas fa-tools mr-1.5 text-amber-500"></i> Cara mengaktifkannya di Firebase Console:</p>
-                <ol class="list-decimal list-inside space-y-2 pl-2">
-                    <li>Buka <a href="https://console.firebase.google.com/" target="_blank" class="text-blue-400 underline">Firebase Console</a> dan pilih proyek Anda.</li>
-                    <li>Pilih menu **Build** &gt; **Authentication** di bilah menu samping.</li>
-                    <li>Klik tab **Sign-in method**.</li>
-                    <li>Klik tombol **Add new provider** lalu pilih **Anonymous**.</li>
-                    <li>Aktifkan tombol geser ke posisi **Enable** dan klik **Save**.</li>
-                </ol>
-            </div>
-            <button onclick="closeAuthWarning()" class="w-full py-4 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all">Saya Mengerti, Tutup Panduan</button>
-        </div>
-    </div>
-
     <!-- Sidebar -->
     <aside id="main-sidebar" class="w-64 border-r border-white/5 flex flex-col fixed h-full bg-black z-50 hidden">
         <div class="p-8 pb-4">
@@ -445,16 +421,15 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        // KONFIGURASI FIREBASE KONSOL BARU
         const firebaseConfig = {
-            apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
-            authDomain: "ritus-street.firebaseapp.com",
-            databaseURL: "https://ritus-street-default-rtdb.firebaseio.com",
-            projectId: "ritus-street",
-            storageBucket: "ritus-street.firebasestorage.app",
-            messagingSenderId: "284211818232",
-            appId: "1:284211818232:web:72a0201e4093157cb4150d",
-            measurementId: "G-GVFB87EJ23"
+          apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
+          authDomain: "ritus-street.firebaseapp.com",
+          databaseURL: "https://ritus-street-default-rtdb.firebaseio.com",
+          projectId: "ritus-street",
+          storageBucket: "ritus-street.firebasestorage.app",
+          messagingSenderId: "284211818232",
+          appId: "1:284211818232:web:72a0201e4093157cb4150d",
+          measurementId: "G-GVFB87EJ23"
         };
         
         const app = initializeApp(firebaseConfig);
@@ -470,16 +445,6 @@
         let currentChartFilter = 'ALL';
         let transactionCart = []; // Variabel penampung keranjang transaksi massal
         const PASSWORDS = ["RITUSSTREET2026", "RITUSMAKASSAR", "RITUS202626"];
-
-        // Memeriksa Sesi Aktif di Awal untuk Menghindari Login Ulang di Tiap Refresh
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('ritus_logged_in') === 'true') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-sidebar').classList.remove('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                initAuth();
-            }
-        });
 
         function formatDate(date = new Date()) {
             const d = String(date.getDate()).padStart(2, '0');
@@ -517,39 +482,27 @@
             return isNaN(parsed) ? 0 : parsed;
         }
 
-        // Fungsi pembersih nama petugas/operator
+        // Fungsi pembersih mata uang Indonesia agar dapat dikonversi menjadi tipe Angka murni atau default ke 'SYSTEM_IMPORT' jika data kosong
         function parseIndonesianOperator(str) {
             if (!str) return 'SYSTEM_IMPORT';
             const cleaned = str.trim().toUpperCase();
             return cleaned === '' ? 'SYSTEM_IMPORT' : cleaned;
         }
 
-        // Auth Logic & Deteksi Otomatis Jika Anonim Belum Diaktifkan di Firebase Console
+        // Auth Logic
         async function initAuth() {
             try {
                 await signInAnonymously(auth);
-                console.log("AUTH USER SUCCESS:", auth.currentUser);
+                console.log("AUTH USER:", auth.currentUser);
             } catch (error) {
-                console.error("Auth Failure Detail:", error);
-                if (error.code === 'auth/operation-not-allowed') {
-                    document.getElementById('modal-auth-warning').classList.remove('hidden');
-                    showToast("Firebase Error: Anonymous Auth Belum Diaktifkan!", true);
-                } else {
-                    showToast("Gagal Otentikasi: " + error.message, true);
-                }
+                console.error("Auth Failure:", error);
             }
         }
-
-        // Helper untuk menutup modal warning autentikasi
-        window.closeAuthWarning = () => {
-            document.getElementById('modal-auth-warning').classList.add('hidden');
-        };
 
         window.checkAuth = async function() {
             const val = document.getElementById('pass-input').value;
             if (PASSWORDS.includes(val)) {
                 showToast("Login berhasil!");
-                sessionStorage.setItem('ritus_logged_in', 'true');
                 await initAuth();
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-sidebar').classList.remove('hidden');
@@ -561,7 +514,7 @@
             }
         };
 
-        // Real-time Data Sync (RULE 3: Selalu pastikan otentikasi user aktif sebelum melakukan query)
+        // Real-time Data Sync
         onAuthStateChanged(auth, (user) => {
             if (!user) return;
             const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
@@ -570,7 +523,6 @@
                 localDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 localDB.sort((a, b) => {
                     const parseDate = (str) => {
-                        if (!str) return new Date(0);
                         const parts = str.split('/');
                         if(parts.length !== 3) return new Date(str);
                         return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
@@ -583,10 +535,7 @@
                     renderHistory();
                 });
             }, (error) => {
-                console.error("Database connection error:", error);
-                if(error.code === 'permission-denied') {
-                    showToast("Koneksi ditolak, silakan sesuaikan Rules Firestore database Anda.", true);
-                }
+                if(error.code === 'permission-denied') showToast("Sesi habis, harap refresh", true);
             });
         });
 
@@ -617,18 +566,14 @@
 
         let mainChart = null;
         function updateDashboard() {
-            // Pembersihan nama & kategori agar aman dari data kosong di database
-            const skus = new Set(localDB.map(x => String(x.name || 'UNKNOWN').trim()));
+            const skus = new Set(localDB.map(x => x.name));
             const prodStock = {};
-            localDB.forEach(t => { 
-                const nameKey = String(t.name || 'UNKNOWN').trim();
-                prodStock[nameKey] = (prodStock[nameKey] || 0) + (t.type === 'In' ? (t.qty || 0) : -(t.qty || 0)); 
-            });
+            localDB.forEach(t => { prodStock[t.name] = (prodStock[t.name] || 0) + (t.type === 'In' ? t.qty : -t.qty); });
             
             document.getElementById('dash-active').innerText = skus.size;
             document.getElementById('dash-empty').innerText = Object.values(prodStock).filter(v => v === 0).length;
-            document.getElementById('dash-in').innerText = localDB.filter(x => x.type === 'In').reduce((a,b)=>a+(b.qty || 0), 0);
-            document.getElementById('dash-out').innerText = localDB.filter(x => x.type === 'Out').reduce((a,b)=>a+(b.qty || 0), 0);
+            document.getElementById('dash-in').innerText = localDB.filter(x => x.type === 'In').reduce((a,b)=>a+b.qty, 0);
+            document.getElementById('dash-out').innerText = localDB.filter(x => x.type === 'Out').reduce((a,b)=>a+b.qty, 0);
             
             // Perhitungan Finansial Dashboard
             let totalCapital = 0; // Modal dari stok barang masuk (In)
@@ -654,11 +599,11 @@
 
             const categories = ["Apparel", "Accessories", "Cans", "Others"];
             const catData = categories.map(cat => {
-                const filtered = localDB.filter(x => String(x.category || 'Others').trim() === cat);
+                const filtered = localDB.filter(x => x.category === cat);
                 if (currentChartFilter === 'ALL') {
-                    return filtered.reduce((a,b) => a + (b.type === 'In' ? (b.qty || 0) : -(b.qty || 0)), 0);
+                    return filtered.reduce((a,b) => a + (b.type === 'In' ? b.qty : -b.qty), 0);
                 } else {
-                    return filtered.filter(x => x.type === currentChartFilter).reduce((a,b) => a + (b.qty || 0), 0);
+                    return filtered.filter(x => x.type === currentChartFilter).reduce((a,b) => a + b.qty, 0);
                 }
             });
 
@@ -739,7 +684,7 @@
         };
 
         window.saveNewProduct = async () => {
-            if (!auth.currentUser) return showToast("Sesi tidak valid / Belum masuk Firebase!", true);
+            if (!auth.currentUser) return showToast("Sesi tidak valid", true);
             const dateStr = document.getElementById('in-date').value;
             const cat = document.getElementById('in-cat').value;
             const name = document.getElementById('in-name').value;
@@ -758,7 +703,7 @@
                 if (apparelType === 'standard') {
                     document.querySelectorAll('.variant-input').forEach(inp => {
                         const q = parseInt(inp.value);
-                        if(q > 0) batch.push({ date, name: name.trim(), info: inp.dataset.var, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                        if(q > 0) batch.push({ date, name, info: inp.dataset.var, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
                     });
                 } else {
                     const names = document.querySelectorAll('.cst-var-name');
@@ -766,13 +711,13 @@
                     names.forEach((nInput, i) => {
                         const vName = nInput.value.trim().toUpperCase();
                         const q = parseInt(qtys[i].value);
-                        if (vName && q > 0) batch.push({ date, name: name.trim(), info: vName, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                        if (vName && q > 0) batch.push({ date, name, info: vName, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
                     });
                 }
             } else {
                 const q = parseInt(document.getElementById('gen-qty').value);
                 const info = document.getElementById('gen-info').value || 'Std';
-                if(q > 0) batch.push({ date, name: name.trim(), info: info.trim(), category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
+                if(q > 0) batch.push({ date, name, info, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
             }
 
             if(batch.length === 0) return showToast("Masukkan Jumlah Stok yang valid!", true);
@@ -803,7 +748,7 @@
 
             } catch(e) {
                 console.error(e);
-                showToast("Gagal menyimpan data ke Firestore", true);
+                showToast("Gagal menyimpan data", true);
             } finally {
                 isProcessing = false;
                 btns.forEach(b => b.disabled = false);
@@ -1026,7 +971,7 @@
                     if (!auth.currentUser) throw new Error("Autentikasi Invalid");
                     
                     // Filter semua dokumen transaksi yang cocok dengan nama & kategori SKU ini
-                    const toUpdate = localDB.filter(x => String(x.name || '').trim() === name && String(x.category || '').trim() === cat);
+                    const toUpdate = localDB.filter(x => x.name === name && x.category === cat);
                     
                     // Proses update harga ke database satu per satu
                     for (const item of toUpdate) {
@@ -1054,23 +999,15 @@
 
         window.closeEditPriceModal = () => document.getElementById('modal-edit-price').classList.add('hidden');
 
-        // --- INVENTORY LOGIC (SANGAT TANGGUH & ANTI-CRASH) ---
+        // --- INVENTORY LOGIC ---
         window.renderInventory = () => {
             const search = document.getElementById('inv-search').value.toLowerCase();
             const catFilter = document.getElementById('inv-filter-cat').value;
             const sortMode = document.getElementById('inv-sort').value;
             
             const products = {};
-            
             localDB.forEach(t => {
-                // SANIATASI AMAN: Mencegah error jika field null/undefined pada Firestore database
-                const sName = t.name ? String(t.name).trim() : 'UNKNOWN PRODUCT';
-                const sCategory = t.category ? String(t.category).trim() : 'Others';
-                const sInfo = t.info ? String(t.info).trim() : 'Std';
-                const sQty = parseInt(t.qty) || 0;
-                const sType = t.type || 'In';
-
-                const key = `${sName}|||${sCategory}`;
+                const key = `${t.name}|||${t.category}`;
                 if(!products[key]) {
                     products[key] = { 
                         variants: {}, 
@@ -1079,13 +1016,13 @@
                         sellingPrice: 0
                     };
                 }
-                const net = (sType === 'In' ? sQty : -sQty);
-                products[key].variants[sInfo] = (products[key].variants[sInfo] || 0) + net;
+                const net = (t.type === 'In' ? t.qty : -t.qty);
+                products[key].variants[t.info] = (products[key].variants[t.info] || 0) + net;
                 products[key].total += net;
                 
-                // Set harga default dari histori terakhir
-                if (products[key].capitalPrice === 0 && t.capitalPrice !== undefined) products[key].capitalPrice = parseFloat(t.capitalPrice) || 0;
-                if (products[key].sellingPrice === 0 && t.sellingPrice !== undefined) products[key].sellingPrice = parseFloat(t.sellingPrice) || 0;
+                // Set harga dari transaksi pertama yang valid (paling baru karena array terurut descending)
+                if (products[key].capitalPrice === 0 && t.capitalPrice !== undefined) products[key].capitalPrice = t.capitalPrice;
+                if (products[key].sellingPrice === 0 && t.sellingPrice !== undefined) products[key].sellingPrice = t.sellingPrice;
             });
 
             let entries = Object.entries(products);
@@ -1096,17 +1033,10 @@
 
             const grid = document.getElementById('inventory-grid');
             if(!grid) return;
-            
             grid.innerHTML = entries.map(([key, data]) => {
                 const [name, cat] = key.split('|||');
                 let varHTML = "";
-                
                 Object.entries(data.variants).forEach(([vName, vQty]) => {
-                    // Membuat ID elemen input yang bebas spasi secara aman
-                    const safeNameId = String(name || '').replace(/[^a-zA-Z0-9]/g, '');
-                    const safeVNameId = String(vName || '').replace(/[^a-zA-Z0-9]/g, '');
-                    const elId = `inp-${safeNameId}-${safeVNameId}`;
-
                     varHTML += `
                         <div class="flex justify-between items-center p-3 bg-white/[0.03] border border-white/5 rounded-xl mb-1">
                             <div class="flex-1">
@@ -1114,9 +1044,9 @@
                                 <p class="font-bold text-xs ${vQty <= 0 ? 'text-rose-500' : 'text-white'}">${vQty} units</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="number" id="${elId}" placeholder="0" class="w-12 p-2 text-center text-xs font-bold rounded bg-zinc-900 border-none outline-none">
-                                <button onclick="triggerMove('${name.replace(/'/g, "\\'")}', '${vName.replace(/'/g, "\\'")}', '${cat}', 'In', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-black transition-all text-[10px] flex items-center justify-center"><i class="fas fa-plus"></i></button>
-                                <button onclick="triggerMove('${name.replace(/'/g, "\\'")}', '${vName.replace(/'/g, "\\'")}', '${cat}', 'Out', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all text-[10px] flex items-center justify-center"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="inp-${name.replace(/\s+/g,'')}-${vName.replace(/\s+/g,'')}" placeholder="0" class="w-12 p-2 text-center text-xs font-bold rounded bg-zinc-900 border-none outline-none">
+                                <button onclick="triggerMove('${name}','${vName}','${cat}','In', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-black transition-all text-[10px] flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                <button onclick="triggerMove('${name}','${vName}','${cat}','Out', ${data.capitalPrice}, ${data.sellingPrice})" class="w-8 h-8 rounded bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all text-[10px] flex items-center justify-center"><i class="fas fa-minus"></i></button>
                             </div>
                         </div>`;
                 });
@@ -1125,12 +1055,12 @@
                     <div class="sku-card glass-card p-6 flex flex-col h-full relative group">
                         <!-- BUTTONS: TOP RIGHT -->
                         <div class="absolute top-4 right-4 flex items-center gap-1">
-                            <!-- Tombol 3 Titik Edit Harga -->
-                            <button onclick="triggerEditPrice('${name.replace(/'/g, "\\'")}','${cat}', ${data.capitalPrice}, ${data.sellingPrice})" class="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white text-xs transition-all p-2" title="Edit Harga SKU">
+                            <!-- Tombol 3 Titik Edit Harga (Baru) -->
+                            <button onclick="triggerEditPrice('${name}','${cat}', ${data.capitalPrice}, ${data.sellingPrice})" class="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-white text-xs transition-all p-2" title="Edit Harga SKU">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <!-- Tombol Hapus SKU -->
-                            <button onclick="triggerDeleteSKU('${name.replace(/'/g, "\\'")}','${cat}')" class="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-400 text-xs transition-all p-2" title="Hapus SKU">
+                            <button onclick="triggerDeleteSKU('${name}','${cat}')" class="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-400 text-xs transition-all p-2" title="Hapus SKU">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -1168,28 +1098,23 @@
         };
 
         window.triggerMove = (name, info, cat, type, capitalPrice = 0, sellingPrice = 0) => {
-            const safeNameId = String(name || '').replace(/[^a-zA-Z0-9]/g, '');
-            const safeVNameId = String(info || '').replace(/[^a-zA-Z0-9]/g, '');
-            const elId = `inp-${safeNameId}-${safeVNameId}`;
-            
+            const elId = `inp-${name.replace(/\s+/g,'')}-${info.replace(/\s+/g,'')}`;
             const el = document.getElementById(elId);
-            if (!el) return showToast("Gagal mendeteksi elemen input!", true);
-            
             const val = parseInt(el.value);
             if(!val || val <= 0) return showToast("Masukkan jumlah yang benar!", true);
 
             const alreadyInCartOut = transactionCart
-                .filter(x => String(x.name).trim() === name && String(x.info).trim() === info && x.type === 'Out')
+                .filter(x => x.name === name && x.info === info && x.type === 'Out')
                 .reduce((a, c) => a + c.qty, 0);
 
             if(type === 'Out') {
-                const stock = localDB.filter(x => String(x.name).trim() === name && String(x.info).trim() === info).reduce((a,c)=>a+(c.type==='In'?(c.qty||0):-(c.qty||0)),0);
+                const stock = localDB.filter(x => x.name === name && x.info === info).reduce((a,c)=>a+(c.type==='In'?c.qty:-c.qty),0);
                 if((val + alreadyInCartOut) > stock) {
-                    return showToast("Stok " + info + " kurang! Sisa: " + stock + " pcs (Di antrean: " + alreadyInCartOut + " pcs)", true);
+                    return showToast(`Stok ${info} kurang! Sisa: ${stock} pcs (Sudah ada di antrean out: ${alreadyInCartOut} pcs)`, true);
                 }
             }
 
-            const existingIndex = transactionCart.findIndex(x => String(x.name).trim() === name && String(x.info).trim() === info && x.type === type);
+            const existingIndex = transactionCart.findIndex(x => x.name === name && x.info === info && x.type === type);
             if (existingIndex > -1) {
                 transactionCart[existingIndex].qty += val;
             } else {
@@ -1218,7 +1143,7 @@
                 if(document.getElementById('delete-sku-verify').value === 'DELETE') {
                     if (!auth.currentUser) return;
                     showToast("Sedang menghapus SKU...", true);
-                    const toDelete = localDB.filter(x => String(x.name || '').trim() === name && String(x.category || '').trim() === cat);
+                    const toDelete = localDB.filter(x => x.name === name && x.category === cat);
                     for (const item of toDelete) {
                         await deleteDoc(doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id));
                     }
@@ -1231,68 +1156,42 @@
             modal.classList.remove('hidden');
         };
 
-        // --- HISTORY (SANGAT TANGGUH & ANTI CRASH) ---
+        // --- HISTORY ---
         window.renderHistory = () => {
-            const search = document.getElementById('hist-search').value.toLowerCase().trim();
+            const search = document.getElementById('hist-search').value.toLowerCase();
             const typeF = document.getElementById('hist-filter-type').value;
             const catF = document.getElementById('hist-filter-cat').value;
             
             let data = localDB.filter(x => {
-                // SANIATASI AMAN: Menghindari error `.toLowerCase()` saat ada data yang kosong di Firestore
-                const sName = x.name ? String(x.name).toLowerCase() : '';
-                const sInfo = x.info ? String(x.info).toLowerCase() : '';
-                const sOperator = x.operator ? String(x.operator).toLowerCase() : '';
-                const sCategory = x.category ? String(x.category) : 'Others';
-                
-                const matchSearch = search === '' || sName.includes(search) || sInfo.includes(search) || sOperator.includes(search);
+                const matchSearch = x.name.toLowerCase().includes(search) || (x.info && x.info.toLowerCase().includes(search)) || (x.operator && x.operator.toLowerCase().includes(search));
                 const matchType = typeF === 'ALL' || x.type === typeF;
-                const matchCat = catF === 'ALL' || sCategory === catF;
+                const matchCat = catF === 'ALL' || x.category === catF;
                 return matchSearch && matchType && matchCat;
             });
 
             const body = document.getElementById('history-body');
             if(!body) return;
-
-            if (data.length === 0) {
-                body.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-6 py-10 text-center text-zinc-500 font-bold uppercase tracking-wider text-xs">
-                            Tidak Ada Riwayat Transaksi Ditemukan
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            body.innerHTML = data.map(t => {
-                const isIncoming = t.type === 'In';
-                const qtyText = isIncoming ? `+${t.qty || 0}` : `-${t.qty || 0}`;
-                const flowClass = isIncoming ? 'text-emerald-500' : 'text-rose-400';
-                const badgeClass = isIncoming ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500';
-
-                return `
-                    <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
-                        <td class="px-6 py-4 opacity-40">${t.date || '-'}</td>
-                        <td class="px-6 py-4 font-bold uppercase text-white">${t.name || 'UNKNOWN'}</td>
-                        <td class="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase">${t.category || 'Others'}</td>
-                        <td class="px-6 py-4 text-zinc-400 font-bold uppercase">${t.info || 'Std'}</td>
-                        <td class="px-6 py-4 text-zinc-400">
-                            <div class="text-[10px]">M: <span class="text-amber-500 font-bold">${formatRupiah(t.capitalPrice)}</span></div>
-                            <div class="text-[10px]">J: <span class="text-emerald-500 font-bold">${formatRupiah(t.sellingPrice)}</span></div>
-                        </td>
-                        <td class="px-6 py-4 font-extrabold uppercase text-zinc-300 text-[10px] tracking-wider">${t.operator || '-'}</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 rounded text-[8px] font-black uppercase ${badgeClass}">${t.type || 'In'}</span>
-                        </td>
-                        <td class="px-6 py-4 text-right font-black ${flowClass}">${qtyText}</td>
-                    </tr>`;
-            }).join('');
+            body.innerHTML = data.map(t => `
+                <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
+                    <td class="px-6 py-4 opacity-40">${t.date}</td>
+                    <td class="px-6 py-4 font-bold uppercase text-white">${t.name}</td>
+                    <td class="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase">${t.category}</td>
+                    <td class="px-6 py-4 text-zinc-400 font-bold uppercase">${t.info}</td>
+                    <td class="px-6 py-4 text-zinc-400">
+                        <div class="text-[10px]">M: <span class="text-amber-500 font-bold">${formatRupiah(t.capitalPrice)}</span></div>
+                        <div class="text-[10px]">J: <span class="text-emerald-500 font-bold">${formatRupiah(t.sellingPrice)}</span></div>
+                    </td>
+                    <td class="px-6 py-4 font-extrabold uppercase text-zinc-300 text-[10px] tracking-wider">${t.operator || '-'}</td>
+                    <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded text-[8px] font-black uppercase ${t.type==='In'?'bg-emerald-500/10 text-emerald-500':'bg-rose-500/10 text-rose-500'}">${t.type}</span></td>
+                    <td class="px-6 py-4 text-right font-black ${t.type==='In'?'text-emerald-500':'text-rose-400'}">${t.type==='In'?'+':'-'}${t.qty}</td>
+                </tr>`).join('');
         };
 
-        // --- CSV IMPORT / EXPORT (STRIP-BY-STRIP RESILIENT PARSING) ---
+        // --- CSV IMPORT / EXPORT ---
         window.exportCSV = () => {
             let csv = "Date;Name;Info;Category;Type;Qty;CapitalPrice;SellingPrice;Operator\n";
             localDB.forEach(t => {
-                csv += `${formatDisplayDate(t.date)};${t.name || ''};${t.info || ''};${t.category || ''};${t.type || ''};${t.qty || 0};${t.capitalPrice || 0};${t.sellingPrice || 0};${t.operator || '-'}\n`;
+                csv += `${formatDisplayDate(t.date)};${t.name};${t.info};${t.category};${t.type};${t.qty};${t.capitalPrice || 0};${t.sellingPrice || 0};${t.operator || '-'}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');
@@ -1305,93 +1204,44 @@
             const file = input.files[0];
             if(!file) return;
             const reader = new FileReader();
-            
-            showToast("Membuka file CSV...", false);
-            
             reader.onload = async (e) => {
-                if(!auth.currentUser) {
-                    showToast("Gagal Impor: Anda belum terhubung/terautentikasi ke Firebase!", true);
-                    return;
-                }
-                
-                // Mendukung pemisahan baris lintas platform (CRLF / LF)
-                const lines = e.target.result.split(/\r?\n/);
+                if(!auth.currentUser) return;
+                const lines = e.target.result.split('\n');
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+                let count = 0;
                 
-                let successCount = 0;
-                let failedCount = 0;
-                
-                showToast("Memproses impor database...", false);
-
-                // Membaca baris per baris secara mandiri agar jika satu baris gagal, baris lain tetap terunggah
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if(!line) continue;
+                    const parts = line.split(';');
+                    if(parts.length < 6) continue;
                     
-                    try {
-                        const parts = line.split(';');
-                        if(parts.length < 6) {
-                            failedCount++;
-                            continue;
-                        }
-                        
-                        // Pembersihan spasi ekstra di awal/akhir dan tengah kata agar melebur ke SKU yang sama
-                        const rawName = parts[1] ? parts[1].trim() : '';
-                        if (!rawName) {
-                            failedCount++;
-                            continue; // Jangan masukkan produk tanpa nama
-                        }
-                        
-                        const cleanName = rawName.replace(/\s+/g, ' '); 
-                        const cleanInfo = parts[2] ? parts[2].trim().replace(/\s+/g, ' ') : 'Std';
-                        
-                        // Menyetarakan penulisan kategori
-                        let cat = parts[3].trim();
-                        const catLower = cat.toLowerCase();
-                        if (catLower.includes('acc')) { 
-                            cat = 'Accessories'; 
-                        } else if (catLower === 'apparel') { 
-                            cat = 'Apparel'; 
-                        } else if (catLower === 'cans') { 
-                            cat = 'Cans'; 
-                        } else { 
-                            cat = 'Others'; 
-                        }
+                    let cat = parts[3].trim();
+                    const catLower = cat.toLowerCase();
+                    if (catLower.includes('acc')) { cat = 'Accessories'; }
+                    else if (catLower === 'apparel') { cat = 'Apparel'; }
+                    else if (catLower === 'cans') { cat = 'Cans'; }
+                    else { cat = 'Others'; }
 
-                        // Konversi mata uang aman
-                        const capitalPrice = parts[6] ? parseIndonesianCurrency(parts[6]) : 0;
-                        const sellingPrice = parts[7] ? parseIndonesianCurrency(parts[7]) : 0;
-                        
-                        const operator = parts[8] ? parseIndonesianOperator(parts[8]) : 'SYSTEM_IMPORT';
+                    const capitalPrice = parts[6] ? parseIndonesianCurrency(parts[6]) : 0;
+                    const sellingPrice = parts[7] ? parseIndonesianCurrency(parts[7]) : 0;
+                    
+                    const operator = parts[8] ? parseIndonesianOperator(parts[8]) : 'SYSTEM_IMPORT';
 
-                        // Tulis baris ke database Firestore secara langsung
-                        await addDoc(colRef, { 
-                            date: parts[0].trim(), 
-                            name: cleanName, 
-                            info: cleanInfo, 
-                            category: cat, 
-                            type: parts[4].trim(), 
-                            qty: parseInt(parts[5].trim()) || 0,
-                            capitalPrice: capitalPrice,
-                            sellingPrice: sellingPrice,
-                            operator: operator
-                        });
-                        
-                        successCount++;
-                    } catch (rowErr) {
-                        console.error(`Gagal memuat baris ke-${i}:`, rowErr);
-                        failedCount++;
-                    }
+                    await addDoc(colRef, { 
+                        date: parts[0].trim(), 
+                        name: parts[1].trim(), 
+                        info: parts[2].trim(), 
+                        category: cat, 
+                        type: parts[4].trim(), 
+                        qty: parseInt(parts[5].trim()),
+                        capitalPrice,
+                        sellingPrice,
+                        operator
+                    });
+                    count++;
                 }
-                
-                if (successCount > 0) {
-                    showToast(`Impor Sukses: ${successCount} baris diunggah, ${failedCount} dilewati.`, false);
-                    // Langsung dialihkan ke panel Inventory Control
-                    switchTab('inventory');
-                } else {
-                    showToast("Gagal Impor: Tidak ada data yang tersimpan. Periksa Rules Firestore database Anda.", true);
-                }
-                
+                showToast(`Import Berhasil: ${count} Logs ditambahkan`, false);
                 input.value = "";
             };
             reader.readAsText(file);
@@ -1411,24 +1261,23 @@
             }
 
             const from = document.getElementById('clean-from').value;
-            const textTo = document.getElementById('clean-to').value;
+            const to = document.getElementById('clean-to').value;
             let toPurge = [];
 
             if (window.cleanupMode === 'all') {
                 toPurge = [...localDB];
             } else if (window.cleanupMode === 'range') {
-                if (!from || !textTo) {
+                if (!from || !to) {
                     return showToast("Pilih kedua rentang tanggal!", true);
                 }
 
                 const fromDateObj = new Date(from);
-                const toDateObj = new Date(textTo);
+                const toDateObj = new Date(to);
 
                 fromDateObj.setHours(0, 0, 0, 0);
                 toDateObj.setHours(23, 59, 59, 999);
 
                 toPurge = localDB.filter(x => {
-                    if (!x.date) return false;
                     const parts = x.date.split('/');
                     if (parts.length !== 3) return false;
                     const transDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
