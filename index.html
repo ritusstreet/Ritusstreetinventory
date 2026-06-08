@@ -1404,19 +1404,16 @@ for (let i = 1; i < lines.length; i++) {
 
 try {
 
-    console.log("SEBELUM addDoc");
+    console.log("USER:", auth.currentUser?.uid);
+    console.log("PAYLOAD:", JSON.stringify(itemPayload));
 
     const docRef = await addDoc(colRef, itemPayload);
 
-    console.log("SETELAH addDoc");
-
     console.log("BERHASIL:", docRef.id);
-
-    count++;
 
 } catch(err) {
 
-    console.error("GAGAL IMPORT:", err);
+    console.error("ERROR FULL:", err);
 
 }
                     }
