@@ -433,6 +433,8 @@
         
         const app = initializeApp(firebaseConfig);
         console.log("Firebase initialized");
+        console.log("Project ID:", firebaseConfig.projectId);
+        console.log("App ID:", appId);
         const auth = getAuth(app);
         const db_fs = getFirestore(app);
         const appId = 'ritus-street-whm';
@@ -511,8 +513,8 @@ function startRealtimeSync() {
                 type: (d.type || '').trim().toUpperCase()
             };
         });
-
         console.log("localDB:", localDB);
+        console.log("Dokumen pertama:", localDB[0]);
         console.log("Render dashboard dimulai");
 
         localDB.sort((a, b) => {
