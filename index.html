@@ -1381,10 +1381,12 @@ if (user) {
                     };
 
                     if (itemPayload.name && itemPayload.qty > 0) {
-                        await addDoc(colRef, itemPayload);
+                        const docRef = await addDoc(colRef, itemPayload);
+                        console.log("Berhasil disimpan:", docRef.id, itemPayload);
                         count++;
                     }
                 }
+                console.log("Total berhasil diimport:", count);
                 showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
             };
