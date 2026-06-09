@@ -415,35 +415,37 @@
     <!-- TOAST -->
     <div id="toast" class="fixed bottom-10 right-10 z-[400] px-10 py-6 font-black rounded-2xl text-[11px] uppercase tracking-widest shadow-2xl transition-all duration-300 translate-y-20 opacity-0 pointer-events-none italic"></div>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        const firebaseConfig = {
-              apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
-              authDomain: "ritus-street.firebaseapp.com",
-              projectId: "ritus-street",
-              storageBucket: "ritus-street.firebasestorage.app",
-              messagingSenderId: "284211818232",
-              appId: "1:284211818232:web:72a0201e4093157cb4150d",
-              measurementId: "G-GVFB87EJ23"
-        };
+        // 1. Inisialisasi Firebase yang aman (Fallback otomatis jika dijalankan di Canvas atau Luar)
+        let configToUse;
+        if (typeof __firebase_config !== 'undefined') {
+            configToUse = JSON.parse(__firebase_config);
+        } else {
+            configToUse = {
+                apiKey: "AIzaSyCF5ZTtZxUCUdYLhIUOlWoMvI6aX2T4qwg",
+                authDomain: "ritus-street.firebaseapp.com",
+                projectId: "ritus-street",
+                storageBucket: "ritus-street.firebasestorage.app",
+                messagingSenderId: "284211818232",
+                appId: "1:284211818232:web:72a0201e4093157cb4150d",
+                measurementId: "G-GVFB87EJ23"
+            };
+        }
         
-        const app = initializeApp(firebaseConfig);
-        console.log("Firebase initialized");
+        const app = initializeApp(configToUse);
         const auth = getAuth(app);
         const db_fs = getFirestore(app);
-        console.log("FIRESTORE:", db_fs);
-        console.log("BUILD 2026-06-09-01");
-        const appId = 'ritus-street-whm';
-        console.log("Project ID:", firebaseConfig.projectId);
-        console.log("AUTH DOMAIN:", firebaseConfig.authDomain);
-console.log("APP ID FIREBASE:", firebaseConfig.appId);
-        console.log("App ID:", appId);
-        console.log("DB APP:", db_fs.app.options.projectId);
-        console.log("HOST:", db_fs._settings?.host);
+        
+        // Gunakan appId environment Canvas jika tersedia untuk mencegah error permission
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ritus-street-whm';
+        
+        // State Variabel
+        const PASSWORDS = ["RITUSSTREET2026", "RITUSMAKASSAR", "RITUS202626"];
         let localDB = [];
         let isProcessing = false;
         let unsubscribeSnap = null;
@@ -451,8 +453,10 @@ console.log("APP ID FIREBASE:", firebaseConfig.appId);
         let currentChartType = 'doughnut';
         let currentChartFilter = 'ALL';
         let transactionCart = [];
-        const PASSWORDS = ["RITUSSTREET2026", "RITUSMAKASSAR", "RITUS202626"];
+        let currentUser = null;
+        let syncStarted = false;
 
+        // Utilities
         function formatDate(date = new Date()) {
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -477,15 +481,9 @@ console.log("APP ID FIREBASE:", firebaseConfig.appId);
             return "Rp " + Number(num).toLocaleString('id-ID');
         }
 
-        // Pembersihan mata uang Indonesia murni agar aman dikonversi menjadi Number
         function parseIndonesianCurrency(str) {
             if (!str) return 0;
-            let cleaned = str.toString().trim()
-                .replace(/Rp/gi, '')
-                .replace(/\s/g, '')
-                .replace(/\./g, '')
-                .replace(/,/g, '.');
-            
+            let cleaned = str.toString().trim().replace(/Rp/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(/,/g, '.');
             const parsed = parseFloat(cleaned);
             return isNaN(parsed) ? 0 : parsed;
         }
@@ -496,127 +494,118 @@ console.log("APP ID FIREBASE:", firebaseConfig.appId);
             return cleaned === '' ? 'SYSTEM_IMPORT' : cleaned;
         }
 
-        // Setup real-time listener di luar trigger login agar sinkronisasi langsung jalan setelah login sukses
-function startRealtimeSync() {
-    console.log("startRealtimeSync DIMULAI");
-    console.log("ONLINE:", navigator.onLine);
-    const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
-    console.log("DATABASE APP:", db_fs.app.options.projectId);
-    console.log("PATH:", colRef.path);
-    console.log("BACA DARI:", colRef.path);
-    if (unsubscribeSnap) unsubscribeSnap();
+        // 2. Alur Autentikasi yang Dipisah
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth init error:", error);
+            }
+        };
 
-  unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+        // Mulai koneksi anonim ke database sejak awal aplikasi berjalan
+        initAuth();
 
-    console.log("SNAPSHOT DITERIMA");
-    console.log("Jumlah dokumen:", snapshot.size);
-
-    snapshot.docs.forEach(doc => {
-        console.log("DOC ID:", doc.id);
-        console.log("DATA:", doc.data());
-         console.log("REF PATH:", doc.ref.path);
-    });
-
-    localDB = snapshot.docs.map(doc => {
-            const d = doc.data();
-            return {
-                id: doc.id,
-                ...d,
-                name: (d.name || '').trim().toUpperCase(),
-                info: (d.info || 'STD').trim().toUpperCase(),
-                category: (d.category || 'OTHERS').trim().toUpperCase(),
-                operator: (d.operator || 'SYSTEM_IMPORT').trim().toUpperCase(),
-                type: (d.type || '').trim().toUpperCase()
-            };
-        });
-        console.log("localDB:", localDB);
-        console.log("Dokumen pertama:", localDB[0]);
-        console.log("Render dashboard dimulai");
-
-        localDB.sort((a, b) => {
-            const parseDate = (str) => {
-                if (!str) return new Date(0);
-                const parts = str.split('/');
-                if(parts.length !== 3) return new Date(str);
-                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-            };
-            return parseDate(b.date) - parseDate(a.date);
-        });
-
-        requestAnimationFrame(() => {
-            console.log("updateDashboard()");
-            updateDashboard();
-
-            console.log("renderInventory()");
-            renderInventory();
-
-            console.log("renderHistory()");
-            renderHistory();
-        });
-
-    }, (error) => {
-        console.error("Firestore Listener Error:", error);
-    });
-}
-
-        // Alur Autentikasi Pengamat Resmi (State Observer) Firebase yang aman dari Refresh
-        onAuthStateChanged(auth, async (user) => {
-if (user) {
-    console.log("Firebase Auth: Terautentikasi.", user.uid);
-    localStorage.setItem('ritus_authenticated', 'true');
-
-    console.log("Elemen login:", document.getElementById('login-screen'));
-    console.log("Elemen sidebar:", document.getElementById('main-sidebar'));
-    console.log("Elemen content:", document.getElementById('main-content'));
-
-    document.getElementById('login-screen')?.classList.add('hidden');
-    document.getElementById('main-sidebar')?.classList.remove('hidden');
-    document.getElementById('main-content')?.classList.remove('hidden');
-
-    console.log("Menjalankan startRealtimeSync()");
-    startRealtimeSync();
-
-    console.log("startRealtimeSync() selesai dipanggil");
-            } else {
-                console.log("Firebase Auth: Tidak ada sesi.");
-                const isSavedAuth = localStorage.getItem('ritus_authenticated');
-                if (isSavedAuth === 'true') {
-                    try {
-                        showToast("Memulihkan sesi...");
-                        await signInAnonymously(auth);
-                    } catch (err) {
-                        console.error("Gagal pemulihan sesi otomatis:", err);
-                        localStorage.removeItem('ritus_authenticated');
-                        showLoginUI();
-                    }
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                console.log("Firebase Database: Terkoneksi & Siap.", user.uid);
+                
+                // Cek apakah user telah melewati layar password aplikasi
+                if (localStorage.getItem('ritus_authenticated') === 'true') {
+                    showMainUI();
+                    startRealtimeSync();
                 } else {
                     showLoginUI();
                 }
+            } else {
+                showLoginUI();
             }
         });
 
-        function showLoginUI() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('main-sidebar').classList.add('hidden');
-            document.getElementById('main-content').classList.add('hidden');
-        }
-
-        window.checkAuth = async function() {
+        window.checkAuth = function() {
             const val = document.getElementById('pass-input').value;
             if (PASSWORDS.includes(val)) {
-                showToast("Memverifikasi...");
-                try {
-                    await signInAnonymously(auth);
-                } catch (error) {
-                    console.error("Authentication Error: ", error);
-                    showToast("❌ Gagal terhubung ke server!", true);
-                }
+                localStorage.setItem('ritus_authenticated', 'true');
+                showMainUI();
+                startRealtimeSync();
+                showToast("Berhasil masuk!");
             } else {
                 showToast("❌ Password Salah!", true);
                 document.getElementById('pass-input').value = "";
                 document.getElementById('pass-input').focus();
             }
         };
+
+        function showMainUI() {
+            document.getElementById('login-screen')?.classList.add('hidden');
+            document.getElementById('main-sidebar')?.classList.remove('hidden');
+            document.getElementById('main-content')?.classList.remove('hidden');
+        }
+
+        function showLoginUI() {
+            document.getElementById('login-screen')?.classList.remove('hidden');
+            document.getElementById('main-sidebar')?.classList.add('hidden');
+            document.getElementById('main-content')?.classList.add('hidden');
+        }
+
+        // 3. Sinkronisasi Real-time yang Aman
+        function startRealtimeSync() {
+            if (syncStarted) return;
+            if (!currentUser) {
+                console.warn("Menunggu koneksi sesi server...");
+                return;
+            }
+            
+            syncStarted = true;
+            const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+            
+            if (unsubscribeSnap) unsubscribeSnap();
+
+            unsubscribeSnap = onSnapshot(colRef, (snapshot) => {
+                localDB = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    return {
+                        id: doc.id,
+                        ...d,
+                        name: (d.name || '').trim().toUpperCase(),
+                        info: (d.info || 'STD').trim().toUpperCase(),
+                        category: (d.category || 'OTHERS').trim().toUpperCase(),
+                        operator: (d.operator || 'SYSTEM_IMPORT').trim().toUpperCase(),
+                        type: (d.type || '').trim().toUpperCase()
+                    };
+                });
+
+                localDB.sort((a, b) => {
+                    const parseDate = (str) => {
+                        if (!str) return new Date(0);
+                        const parts = str.split('/');
+                        if(parts.length !== 3) return new Date(str);
+                        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    };
+                    return parseDate(b.date) - parseDate(a.date);
+                });
+
+                requestAnimationFrame(() => {
+                    updateDashboard();
+                    renderInventory();
+                    renderHistory();
+                });
+
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+                syncStarted = false; // Izinkan coba lagi nanti
+                if (error.code === 'permission-denied') {
+                    showToast("❌ Akses database ditolak! (Cek Aturan/Rules Firestore Anda)", true);
+                } else {
+                    showToast("❌ Gagal sinkronisasi data dari server", true);
+                }
+            });
+        }
 
         // Tab Navigation
         window.switchTab = (id) => {
@@ -761,7 +750,8 @@ if (user) {
         };
 
         window.saveNewProduct = async () => {
-            if (!auth.currentUser) return showToast("Sesi tidak valid", true);
+            if (!currentUser) return showToast("Sesi tidak valid, mohon tunggu koneksi ke server", true);
+            
             const dateStr = document.getElementById('in-date').value;
             const cat = document.getElementById('in-cat').value.trim().toUpperCase();
             const name = document.getElementById('in-name').value.trim().toUpperCase();
@@ -778,21 +768,10 @@ if (user) {
             const batch = [];
             if(cat === 'APPAREL') {
                 if (apparelType === 'standard') {
-                    // Cari hanya di standard-sizes yang aktif saat ini
                     document.querySelectorAll('#standard-sizes .variant-input').forEach(inp => {
                         const q = parseInt(inp.value);
                         if(!isNaN(q) && q > 0) {
-                            batch.push({ 
-                                date, 
-                                name, 
-                                info: inp.dataset.var.trim().toUpperCase(), 
-                                category: cat, 
-                                type: 'In', 
-                                qty: q, 
-                                capitalPrice, 
-                                sellingPrice, 
-                                operator 
-                            });
+                            batch.push({ date, name, info: inp.dataset.var.trim().toUpperCase(), category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
                         }
                     });
                 } else {
@@ -802,17 +781,7 @@ if (user) {
                         const vName = nInput.value.trim().toUpperCase();
                         const q = parseInt(qtys[i].value);
                         if (vName && !isNaN(q) && q > 0) {
-                            batch.push({ 
-                                date, 
-                                name, 
-                                info: vName, 
-                                category: cat, 
-                                type: 'In', 
-                                qty: q, 
-                                capitalPrice, 
-                                sellingPrice, 
-                                operator 
-                            });
+                            batch.push({ date, name, info: vName, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
                         }
                     });
                 }
@@ -820,17 +789,7 @@ if (user) {
                 const q = parseInt(document.getElementById('gen-qty').value);
                 const info = document.getElementById('gen-info').value.trim().toUpperCase() || 'STD';
                 if(!isNaN(q) && q > 0) {
-                    batch.push({ 
-                        date, 
-                        name, 
-                        info, 
-                        category: cat, 
-                        type: 'In', 
-                        qty: q, 
-                        capitalPrice, 
-                        sellingPrice, 
-                        operator 
-                    });
+                    batch.push({ date, name, info, category: cat, type: 'In', qty: q, capitalPrice, sellingPrice, operator });
                 }
             }
 
@@ -862,7 +821,7 @@ if (user) {
 
             } catch(e) {
                 console.error(e);
-                showToast("Gagal menyimpan data", true);
+                showToast("Gagal menyimpan data ke database server", true);
             } finally {
                 isProcessing = false;
                 btns.forEach(b => b.disabled = false);
@@ -995,9 +954,7 @@ if (user) {
             showToast(`Dihapus: ${removed.name} (${removed.info})`);
             renderCartItems();
             updateCartUI();
-            if (transactionCart.length === 0) {
-                toggleCartModal(false);
-            }
+            if (transactionCart.length === 0) toggleCartModal(false);
         };
 
         window.clearCart = () => {
@@ -1009,9 +966,7 @@ if (user) {
 
         window.processBulkTransactions = async () => {
             const opName = document.getElementById('cart-operator').value.trim().toUpperCase();
-            if (!opName) {
-                return showToast("Masukkan Nama PIC!", true);
-            }
+            if (!opName) return showToast("Masukkan Nama PIC!", true);
 
             if (isProcessing) return;
             isProcessing = true;
@@ -1021,7 +976,7 @@ if (user) {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> PROCESSING...';
 
             try {
-                if (!auth.currentUser) throw new Error("Autentikasi Invalid");
+                if (!currentUser) throw new Error("Sesi database belum siap");
                 
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
 
@@ -1041,17 +996,15 @@ if (user) {
                 }
 
                 showToast(`Sukses memproses ${transactionCart.length} transaksi massal!`);
-                
                 transactionCart = [];
                 document.getElementById('cart-operator').value = "";
-                
                 updateCartUI();
                 toggleCartModal(false);
                 switchTab('history');
 
             } catch (err) {
                 console.error(err);
-                showToast("Gagal memproses transaksi massal", true);
+                showToast("Gagal memproses transaksi (Cek Koneksi & Rules Firestore)", true);
             } finally {
                 isProcessing = false;
                 submitBtn.disabled = false;
@@ -1073,17 +1026,14 @@ if (user) {
                 const newSelling = parseFloat(document.getElementById('edit-price-selling').value) || 0;
                 const operator = document.getElementById('edit-price-operator').value.trim().toUpperCase();
                 
-                if (!operator) {
-                    return showToast("Masukkan Nama PIC!", true);
-                }
-                
+                if (!operator) return showToast("Masukkan Nama PIC!", true);
                 if (isProcessing) return;
                 isProcessing = true;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MEMPROSES...';
                 
                 try {
-                    if (!auth.currentUser) throw new Error("Autentikasi Invalid");
+                    if (!currentUser) throw new Error("Sesi server tidak valid");
                     
                     const toUpdate = localDB.filter(x => x.name.trim().toUpperCase() === name.trim().toUpperCase() && x.category.trim().toUpperCase() === cat.trim().toUpperCase());
                     
@@ -1129,12 +1079,7 @@ if (user) {
 
                 const key = `${safeName}|||${safeCat}`;
                 if(!products[key]) {
-                    products[key] = { 
-                        variants: {}, 
-                        total: 0,
-                        capitalPrice: 0,
-                        sellingPrice: 0
-                    };
+                    products[key] = { variants: {}, total: 0, capitalPrice: 0, sellingPrice: 0 };
                 }
                 const net = (safeType === 'IN' ? t.qty : -t.qty);
                 products[key].variants[safeInfo] = (products[key].variants[safeInfo] || 0) + net;
@@ -1145,24 +1090,13 @@ if (user) {
             });
 
             let entries = Object.entries(products);
-            console.log("inventory-grid =", document.getElementById('inventory-grid'));
-            console.log("localDB =", localDB);
-            console.log("entries =", entries);
-            console.log("entries length =", entries.length);
             if(catFilter !== 'ALL') entries = entries.filter(([k]) => k.split('|||')[1] === catFilter);
             if(search) entries = entries.filter(([k]) => k.split('|||')[0].includes(search));
             if(sortMode === 'highest') entries.sort((a, b) => b[1].total - a[1].total);
             if(sortMode === 'lowest') entries.sort((a, b) => a[1].total - b[1].total);
 
             const grid = document.getElementById('inventory-grid');
-            console.log("inventory-grid =", grid);
-
-            if(!grid) {
-                console.error("inventory-grid TIDAK DITEMUKAN");
-                return;
-            }
-         console.log("entries =", entries);
-        console.log("jumlah entries =", entries.length);
+            if(!grid) return;
 
             if (entries.length === 0) {
                 grid.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-500 font-bold uppercase text-xs tracking-wider">SKU tidak ditemukan</div>`;
@@ -1173,7 +1107,6 @@ if (user) {
                 const [name, cat] = key.split('|||');
                 let varHTML = "";
                 
-                // Urutkan varian agar S, M, L, XL, XXL berurutan rapi di antrean visual
                 const orderMap = { "S": 1, "M": 2, "L": 3, "XL": 4, "XXL": 5 };
                 const sortedVariants = Object.entries(data.variants).sort((a, b) => {
                     const valA = orderMap[a[0]] || 99;
@@ -1182,7 +1115,6 @@ if (user) {
                 });
 
                 sortedVariants.forEach(([vName, vQty]) => {
-                    // Gunakan ID input unik dengan kombinasi aman base64 atau string sederhana
                     const safeNameId = btoa(encodeURIComponent(name)).replace(/[^A-Za-z0-9]/g, '');
                     const safeVarId = btoa(encodeURIComponent(vName)).replace(/[^A-Za-z0-9]/g, '');
                     const elId = `inp-${safeNameId}-${safeVarId}`;
@@ -1271,14 +1203,7 @@ if (user) {
                 transactionCart[existingIndex].qty += val;
             } else {
                 transactionCart.push({
-                    name: cleanName, 
-                    info: cleanInfo, 
-                    category: cleanCat, 
-                    type: typeUpper, 
-                    qty: val, 
-                    capitalPrice, 
-                    sellingPrice,
-                    originalSellingPrice: sellingPrice
+                    name: cleanName, info: cleanInfo, category: cleanCat, type: typeUpper, qty: val, capitalPrice, sellingPrice, originalSellingPrice: sellingPrice
                 });
             }
 
@@ -1293,14 +1218,18 @@ if (user) {
             document.getElementById('delete-sku-verify').value = "";
             document.getElementById('delete-sku-btn').onclick = async () => {
                 if(document.getElementById('delete-sku-verify').value === 'DELETE') {
-                    if (!auth.currentUser) return;
+                    if (!currentUser) return showToast("Sesi terputus", true);
                     showToast("Sedang menghapus SKU...", true);
-                    const toDelete = localDB.filter(x => x.name.trim().toUpperCase() === name.trim().toUpperCase() && x.category.trim().toUpperCase() === cat.trim().toUpperCase());
-                    for (const item of toDelete) {
-                        await deleteDoc(doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id));
+                    try {
+                        const toDelete = localDB.filter(x => x.name.trim().toUpperCase() === name.trim().toUpperCase() && x.category.trim().toUpperCase() === cat.trim().toUpperCase());
+                        for (const item of toDelete) {
+                            await deleteDoc(doc(db_fs, 'artifacts', appId, 'public', 'data', 'transactions', item.id));
+                        }
+                        closeDeleteModal();
+                        showToast("SKU berhasil dihapus permanen");
+                    } catch (err) {
+                        showToast("Gagal menghapus SKU", true);
                     }
-                    closeDeleteModal();
-                    showToast("SKU berhasil dihapus permanen");
                 } else {
                     showToast("Pengetikan verifikasi salah!", true);
                 }
@@ -1360,44 +1289,23 @@ if (user) {
             if(!file) return;
             const reader = new FileReader();
             reader.onload = async (e) => {
-                if(!auth.currentUser) return;
+                if(!currentUser) return showToast("Sesi terputus", true);
                 
-                // Pisahkan baris menggunakan regex aman dari karakter Carriage Return (\r\n)
                 const lines = e.target.result.split(/\r?\n/);
-                console.log("JUMLAH BARIS CSV:", lines.length);
-                console.log(lines);
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
-                console.log("IMPORT KE:", colRef.path);
-                console.log("PROJECT:", db_fs.app.options.projectId);
-                console.log("APP:", appId);
                 let count = 0;
                 
-for (let i = 1; i < lines.length; i++) {
-
-    console.log("BARIS", i);
-    console.log(lines[i]);
-
-    const line = lines[i].trim();
-
-    if(!line) {
-        console.log("SKIP: kosong");
-        continue;
-    }
-
-    const parts = line.split(';');
-
-    console.log("PARTS:", parts);
-
-    if(parts.length < 6) {
-        console.log("SKIP: kolom kurang");
-        continue;
-    }
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if(!line) continue;
+                    const parts = line.split(';');
+                    if(parts.length < 6) continue;
          
                     let cat = parts[3].trim().toUpperCase();
-                    if (cat.includes('ACC')) { cat = 'ACCESSORIES'; }
-                    else if (cat === 'APPAREL') { cat = 'APPAREL'; }
-                    else if (cat === 'CANS') { cat = 'CANS'; }
-                    else { cat = 'OTHERS'; }
+                    if (cat.includes('ACC')) cat = 'ACCESSORIES';
+                    else if (cat === 'APPAREL') cat = 'APPAREL';
+                    else if (cat === 'CANS') cat = 'CANS';
+                    else cat = 'OTHERS';
 
                     const capitalPrice = parts[6] ? parseIndonesianCurrency(parts[6]) : 0;
                     const sellingPrice = parts[7] ? parseIndonesianCurrency(parts[7]) : 0;
@@ -1408,39 +1316,22 @@ for (let i = 1; i < lines.length; i++) {
                         name: parts[1].trim().toUpperCase(), 
                         info: parts[2].trim().toUpperCase(), 
                         category: cat, 
-                        type: parts[4].trim().toUpperCase(), // IN / OUT standarisasi kapital penuh
+                        type: parts[4].trim().toUpperCase(), 
                         qty: parseInt(parts[5].trim()) || 0,
                         capitalPrice,
                         sellingPrice,
                         operator
                     };
 
-                if (itemPayload.name && itemPayload.qty > 0) {
-
-    console.log("AKAN DISIMPAN:", itemPayload);
-try {
-
-    console.log("USER:", auth.currentUser?.uid);
-    console.log("PAYLOAD:", JSON.stringify(itemPayload));
-
-    console.log("SEBELUM TEST RITUS");
-
-    const docRef = await addDoc(colRef, itemPayload);
-
-    
-    console.log("BERHASIL:", docRef.id);
-console.log("PATH DOC:", docRef.path);
-    count++;
-
-} catch(err) {
-
-    console.error("ERROR FULL:", err);
-
-}
+                    if (itemPayload.name && itemPayload.qty > 0) {
+                        try {
+                            await addDoc(colRef, itemPayload);
+                            count++;
+                        } catch(err) {
+                            console.error("Gagal import:", err);
+                        }
                     }
-}
-               console.log("LOOP SELESAI");
-                console.log("Total berhasil diimport:", count);
+                }
                 showToast(`Import Berhasil: ${count} Baris Data ditambahkan`, false);
                 input.value = "";
             };
@@ -1467,9 +1358,7 @@ console.log("PATH DOC:", docRef.path);
             if (window.cleanupMode === 'all') {
                 toPurge = [...localDB];
             } else if (window.cleanupMode === 'range') {
-                if (!from || !to) {
-                    return showToast("Pilih kedua rentang tanggal!", true);
-                }
+                if (!from || !to) return showToast("Pilih kedua rentang tanggal!", true);
 
                 const fromDateObj = new Date(from);
                 const toDateObj = new Date(to);
@@ -1486,12 +1375,8 @@ console.log("PATH DOC:", docRef.path);
                 });
             }
 
-            if (toPurge.length === 0) {
-                return showToast("Tidak ada data ditemukan di rentang tersebut.", true);
-            }
-            if (!auth.currentUser) {
-                return showToast("Sesi Auth tidak valid", true);
-            }
+            if (toPurge.length === 0) return showToast("Tidak ada data ditemukan di rentang tersebut.", true);
+            if (!currentUser) return showToast("Sesi tidak valid", true);
 
             if (isProcessing) return;
             isProcessing = true;
@@ -1515,7 +1400,6 @@ console.log("PATH DOC:", docRef.path);
         };
 
         // UTILS
-        window.closeModal = () => document.getElementById('modal-confirm').classList.add('hidden');
         window.closeDeleteModal = () => document.getElementById('modal-delete-sku').classList.add('hidden');
 
         function showToast(m, err=false) {
@@ -1527,9 +1411,7 @@ console.log("PATH DOC:", docRef.path);
         }
 
         document.getElementById('pass-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkAuth();
-            }
+            if (e.key === 'Enter') checkAuth();
         });
     </script>
 </body>
