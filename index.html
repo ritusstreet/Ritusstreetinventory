@@ -435,6 +435,7 @@
         console.log("Firebase initialized");
         const auth = getAuth(app);
         const db_fs = getFirestore(app);
+        console.log("FIRESTORE:", db_fs);
         console.log("BUILD 2026-06-09-01");
         const appId = 'ritus-street-whm';
         console.log("Project ID:", firebaseConfig.projectId);
@@ -496,6 +497,7 @@
         // Setup real-time listener di luar trigger login agar sinkronisasi langsung jalan setelah login sukses
 function startRealtimeSync() {
     console.log("startRealtimeSync DIMULAI");
+    console.log("ONLINE:", navigator.onLine);
     const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
     console.log("DATABASE APP:", db_fs.app.options.projectId);
     console.log("PATH:", colRef.path);
