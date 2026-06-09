@@ -514,6 +514,7 @@ function startRealtimeSync() {
     snapshot.docs.forEach(doc => {
         console.log("DOC ID:", doc.id);
         console.log("DATA:", doc.data());
+         console.log("REF PATH:", doc.ref.path);
     });
 
     localDB = snapshot.docs.map(doc => {
