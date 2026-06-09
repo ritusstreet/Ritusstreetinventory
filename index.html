@@ -496,6 +496,8 @@
 function startRealtimeSync() {
     console.log("startRealtimeSync DIMULAI");
     const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
+    console.log("DATABASE APP:", db_fs.app.options.projectId);
+    console.log("PATH:", colRef.path);
     console.log("BACA DARI:", colRef.path);
     if (unsubscribeSnap) unsubscribeSnap();
 
