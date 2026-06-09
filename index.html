@@ -1362,6 +1362,8 @@ if (user) {
                 console.log(lines);
                 const colRef = collection(db_fs, 'artifacts', appId, 'public', 'data', 'transactions');
                 console.log("IMPORT KE:", colRef.path);
+                console.log("PROJECT:", db_fs.app.options.projectId);
+                console.log("APP:", appId);
                 let count = 0;
                 
 for (let i = 1; i < lines.length; i++) {
@@ -1419,8 +1421,9 @@ try {
 
     const docRef = await addDoc(colRef, itemPayload);
 
+    
     console.log("BERHASIL:", docRef.id);
-
+console.log("PATH DOC:", docRef.path);
     count++;
 
 } catch(err) {
