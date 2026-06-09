@@ -548,13 +548,7 @@
             document.getElementById('main-content')?.classList.remove('hidden');
         }
 
-        function showLoginUI() {
-            document.getElementById('login-screen')?.classList.remove('hidden');
-            document.getElementById('main-sidebar')?.classList.add('hidden');
-            document.getElementById('main-content')?.classList.add('hidden');
-        }
-
-        // 3. Sinkronisasi Real-time yang Aman
+        // 3. Sinkronisasi Real-time yang Aman menggunakan Firestore SDK
         function startRealtimeSync() {
             if (syncStarted) return;
             if (!currentUser) {
@@ -606,6 +600,12 @@
                     showToast("❌ Gagal sinkronisasi data dari server", true);
                 }
             });
+        }
+
+        function showLoginUI() {
+            document.getElementById('login-screen')?.classList.remove('hidden');
+            document.getElementById('main-sidebar')?.classList.add('hidden');
+            document.getElementById('main-content')?.classList.add('hidden');
         }
 
         // Tab Navigation
