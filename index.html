@@ -421,7 +421,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        // 1. Inisialisasi Firebase yang aman (Fallback otomatis ke konfigurasi yang Anda minta)
+        // 1. Inisialisasi Firebase yang aman (Menggunakan config database wms-ritus-street yang aktif)
         let configToUse;
         if (typeof __firebase_config !== 'undefined') {
             configToUse = JSON.parse(__firebase_config);
@@ -547,7 +547,7 @@
             document.getElementById('main-content')?.classList.remove('hidden');
         }
 
-        // 3. Sinkronisasi Real-time yang Aman menggunakan Firestore SDK
+        // 3. Sinkronisasi Real-time menggunakan Firestore SDK
         function startRealtimeSync() {
             if (syncStarted) return;
             if (!currentUser) {
